@@ -65,7 +65,7 @@ class PublisherController implements PublisherApi {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public PublisherResponse updatePublisher(@PathVariable @NotNull UUID id,
                                              @RequestBody @Valid PublisherUpdateRequest request) {
         return publisherService.update(id, request);

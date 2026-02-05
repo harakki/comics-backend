@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Collections", description = "User collections management")
-@SecurityRequirement(name = "bearer-jwt")
 public interface UserCollectionApi {
 
     @Operation(

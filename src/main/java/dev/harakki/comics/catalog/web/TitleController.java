@@ -39,7 +39,7 @@ class TitleController implements TitleApi {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public TitleResponse updateTitle(
             @PathVariable @NotNull UUID id,
             @RequestBody @Valid TitleUpdateRequest request

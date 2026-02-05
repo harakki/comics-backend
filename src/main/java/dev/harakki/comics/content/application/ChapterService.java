@@ -189,15 +189,17 @@ public class ChapterService {
             throw new ResourceNotFoundException("Chapter with id " + chapterId + " not found");
         }
 
+        var userId = SecurityUtils.getOptionalCurrentUserId().orElse(null);
+
         var event = new ChapterReadEvent(
                 titleId,
-                request.userId(),
+                userId,
                 chapterId,
                 request.readTimeMillis()
         );
 
         eventPublisher.publishEvent(event);
-        log.info("Published chapter read event: chapterId={}, userId={}", chapterId, request.userId());
+        log.info("Published chapter read event: chapterId={}, userId={}", chapterId, userId);
     }
 
     public ChapterReadStatusResponse isChapterRead(UUID chapterId, UUID titleId) {

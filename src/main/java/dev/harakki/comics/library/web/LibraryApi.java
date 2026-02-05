@@ -20,7 +20,6 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.UUID;
 
 @Tag(name = "Library", description = "User's personal library management")
-@SecurityRequirement(name = "bearer-jwt")
 public interface LibraryApi {
 
     @Operation(

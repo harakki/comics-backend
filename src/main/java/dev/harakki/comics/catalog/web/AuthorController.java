@@ -65,7 +65,7 @@ class AuthorController implements AuthorApi {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public AuthorResponse updateAuthor(@PathVariable UUID id, @RequestBody @Valid AuthorUpdateRequest request) {
         return authorService.update(id, request);
     }
