@@ -26,14 +26,14 @@ public class AnalyticsEventListener {
     @Async
     @ApplicationModuleListener
     public void on(ChapterReadEvent event) {
-        log.debug("Processing chapter read event: titleId={}, userId={}, chapterId={}, readTime={}ms",
-                event.titleId(), event.userId(), event.chapterId(), event.readTimeMillis());
+        log.debug("Processing chapter read event: userId={}, chapterId={}, readTime={}ms",
+                event.userId(), event.chapterId(), event.readTimeMillis());
 
         try {
             analyticsService.recordChapterRead(event);
-            log.info("Chapter read event processed successfully: titleId={}, userId{}", event.titleId(), event.userId());
+            log.info("Chapter read event processed successfully: userId={}, chapterId={}", event.userId(), event.chapterId());
         } catch (Exception e) {
-            log.error("Failed to process chapter read event: titleId={}, userId={}", event.titleId(), event.userId(), e);
+            log.error("Failed to process chapter read event: userId={}, chapterId={}", event.userId(), event.chapterId());
         }
     }
 

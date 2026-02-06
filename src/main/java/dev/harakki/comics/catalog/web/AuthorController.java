@@ -5,9 +5,6 @@ import dev.harakki.comics.catalog.domain.Author;
 import dev.harakki.comics.catalog.dto.AuthorCreateRequest;
 import dev.harakki.comics.catalog.dto.AuthorResponse;
 import dev.harakki.comics.catalog.dto.AuthorUpdateRequest;
-import dev.harakki.comics.catalog.dto.ReplaceSlugRequest;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.kaczmarzyk.spring.data.jpa.domain.Equal;
 import net.kaczmarzyk.spring.data.jpa.domain.LikeIgnoreCase;
@@ -33,17 +30,12 @@ class AuthorController implements AuthorApi {
     private final AuthorService authorService;
 
     @GetMapping("/{id}")
-    public AuthorResponse getAuthor(@PathVariable @NotNull UUID id) {
+    public AuthorResponse getAuthor(@PathVariable UUID id) {
         return authorService.getById(id);
     }
 
-    @GetMapping("/slug/{slug}")
-    public AuthorResponse getAuthorBySlug(@PathVariable @NotNull String slug) {
-        return authorService.getBySlug(slug);
-    }
-
     @GetMapping
-    public Page<AuthorResponse> getAllAuthors(
+    public Page<AuthorResponse> getAuthors(
             @Or({
                     @Spec(path = "name", params = "search", spec = LikeIgnoreCase.class),
                     @Spec(path = "slug", params = "search", spec = LikeIgnoreCase.class)
@@ -60,27 +52,20 @@ class AuthorController implements AuthorApi {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public AuthorResponse createAuthor(@RequestBody @Valid AuthorCreateRequest request) {
+    public AuthorResponse createAuthor(@RequestBody AuthorCreateRequest request) {
         return authorService.create(request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
-    public AuthorResponse updateAuthor(@PathVariable UUID id, @RequestBody @Valid AuthorUpdateRequest request) {
+    public AuthorResponse updateAuthor(@PathVariable UUID id, @RequestBody AuthorUpdateRequest request) {
         return authorService.update(id, request);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}" + "/slug")
-    public AuthorResponse updateAuthorSlug(@PathVariable @NotNull UUID id,
-                                           @RequestBody @Valid ReplaceSlugRequest request) {
-        return authorService.updateSlug(id, request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAuthor(@PathVariable @NotNull UUID id) {
+    public void deleteAuthor(@PathVariable UUID id) {
         authorService.delete(id);
     }
 

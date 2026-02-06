@@ -53,10 +53,18 @@ public class PublisherService {
 
         var publisher = publisherMapper.toEntity(request);
 
-        // Generate and set unique slug
-        String slug = slugGenerator.generate(publisher.getName(), publisherRepository::existsBySlug);
+        // Process slug
+        var slug = request.slug();
+        if (slug != null && !slug.isBlank()) {
+            if (publisherRepository.existsBySlug(slug)) {
+                throw new ResourceAlreadyExistsException("Publisher with slug '" + slug + "' already exists");
+            }
+        } else {
+            slug = slugGenerator.generate(publisher.getName(), publisherRepository::existsBySlug);
+        }
         publisher.setSlug(slug);
 
+        // Process logo media
         if (request.logoMediaId() != null) {
             eventPublisher.publishEvent(new MediaFixateRequestedEvent(request.logoMediaId()));
         }
@@ -75,6 +83,17 @@ public class PublisherService {
         return publisherMapper.toResponse(publisher);
     }
 
+    public PublisherResponse getById(UUID id) {
+        return publisherRepository.findById(id)
+                .map(publisherMapper::toResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("Publisher with id " + id + " not found"));
+    }
+
+    public Page<PublisherResponse> getAll(Specification<Publisher> spec, Pageable pageable) {
+        return publisherRepository.findAll(spec, pageable)
+                .map(publisherMapper::toResponse);
+    }
+
     @Transactional
     public PublisherResponse update(UUID id, PublisherUpdateRequest request) {
         var publisher = publisherRepository.findById(id)
@@ -85,10 +104,11 @@ public class PublisherService {
         }
 
         var oldMediaId = publisher.getLogoMediaId();
+        var newMediaId = request.logoMediaId();
 
         publisher = publisherMapper.partialUpdate(request, publisher);
-        var newMediaId = publisher.getLogoMediaId();
 
+        // Process logo media changes
         if (!Objects.equals(oldMediaId, newMediaId)) {
             if (newMediaId != null) {
                 eventPublisher.publishEvent(new MediaFixateRequestedEvent(newMediaId));
@@ -98,6 +118,11 @@ public class PublisherService {
             }
         }
 
+        // Process slug change
+        if (request.slug() != null && publisherRepository.existsBySlugAndIdNot(request.slug(), id)) {
+            throw new ResourceAlreadyExistsException("Publisher with slug '" + request.slug() + "' already exists");
+        }
+
         publisher = publisherRepository.save(publisher);
         log.debug("Updated publisher: id={}", id);
 
@@ -105,41 +130,6 @@ public class PublisherService {
         eventPublisher.publishEvent(new PublisherUpdatedEvent(publisher.getId(), userId));
 
         return publisherMapper.toResponse(publisher);
-    }
-
-    @Transactional
-    public PublisherResponse updateSlug(UUID id, @Valid ReplaceSlugRequest request) {
-        var publisher = publisherRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Publisher with id " + id + " not found"));
-
-        if (publisherRepository.existsBySlugAndIdNot(request.slug(), id)) {
-            throw new ResourceAlreadyExistsException("Publisher with slug '" + request + "' already exists");
-        }
-
-        publisher.setSlug(request.slug());
-        publisher = publisherRepository.save(publisher);
-
-        var userId = SecurityUtils.getOptionalCurrentUserId().orElse(null);
-        eventPublisher.publishEvent(new PublisherUpdatedEvent(publisher.getId(), userId));
-
-        return publisherMapper.toResponse(publisher);
-    }
-
-    public PublisherResponse getById(UUID id) {
-        return publisherRepository.findById(id)
-                .map(publisherMapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Publisher with id " + id + " not found"));
-    }
-
-    public PublisherResponse getBySlug(String slug) {
-        return publisherRepository.findBySlug(slug)
-                .map(publisherMapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Publisher with slug '" + slug + "' not found"));
-    }
-
-    public Page<PublisherResponse> getAll(Specification<Publisher> spec, Pageable pageable) {
-        return publisherRepository.findAll(spec, pageable)
-                .map(publisherMapper::toResponse);
     }
 
     @Transactional

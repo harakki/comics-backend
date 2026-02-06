@@ -6,8 +6,6 @@ import dev.harakki.comics.catalog.dto.PublisherCreateRequest;
 import dev.harakki.comics.catalog.dto.PublisherResponse;
 import dev.harakki.comics.catalog.dto.PublisherUpdateRequest;
 import dev.harakki.comics.catalog.dto.ReplaceSlugRequest;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.kaczmarzyk.spring.data.jpa.domain.Equal;
 import net.kaczmarzyk.spring.data.jpa.domain.LikeIgnoreCase;
@@ -33,17 +31,12 @@ class PublisherController implements PublisherApi {
     private final PublisherService publisherService;
 
     @GetMapping("/{id}")
-    public PublisherResponse getPublisher(@PathVariable @NotNull UUID id) {
+    public PublisherResponse getPublisher(@PathVariable UUID id) {
         return publisherService.getById(id);
     }
 
-    @GetMapping("/slug/{slug}")
-    public PublisherResponse getPublisherBySlug(@PathVariable @NotNull String slug) {
-        return publisherService.getBySlug(slug);
-    }
-
     @GetMapping
-    public Page<PublisherResponse> getAllPublishers(
+    public Page<PublisherResponse> getPublishers(
             @Or({
                     @Spec(path = "name", params = "search", spec = LikeIgnoreCase.class),
                     @Spec(path = "slug", params = "search", spec = LikeIgnoreCase.class)
@@ -60,30 +53,21 @@ class PublisherController implements PublisherApi {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PublisherResponse createPublisher(@RequestBody @Valid PublisherCreateRequest request) {
+    public PublisherResponse createPublisher(@RequestBody PublisherCreateRequest request) {
         return publisherService.create(request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
-    public PublisherResponse updatePublisher(@PathVariable @NotNull UUID id,
-                                             @RequestBody @Valid PublisherUpdateRequest request) {
+    public PublisherResponse updatePublisher(@PathVariable UUID id,
+                                             @RequestBody PublisherUpdateRequest request) {
         return publisherService.update(id, request);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}" + "/slug")
-    public PublisherResponse updatePublisherSlug(
-            @PathVariable @NotNull UUID id,
-            @RequestBody @Valid ReplaceSlugRequest request
-    ) {
-        return publisherService.updateSlug(id, request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePublisher(@PathVariable @NotNull UUID id) {
+    public void deletePublisher(@PathVariable UUID id) {
         publisherService.delete(id);
     }
 

@@ -41,13 +41,13 @@ public class TagService {
 
         var tag = tagMapper.toEntity(request);
 
-        String slug = request.slug();
-        if (slug == null || slug.isBlank()) {
-            slug = slugGenerator.generate(request.name(), tagRepository::existsBySlug);
-        } else {
+        var slug = request.slug();
+        if (slug != null && !slug.isBlank()) {
             if (tagRepository.existsBySlug(slug)) {
                 throw new ResourceAlreadyExistsException("Tag with slug '" + slug + "' already exists");
             }
+        } else {
+            slug = slugGenerator.generate(request.name(), tagRepository::existsBySlug);
         }
         tag.setSlug(slug);
 
@@ -59,7 +59,17 @@ public class TagService {
         }
 
         return tagMapper.toResponse(tag);
+    }
 
+    public TagResponse getById(UUID id) {
+        return tagRepository.findById(id)
+                .map(tagMapper::toResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("Tag with id " + id + " not found"));
+    }
+
+    public Page<TagResponse> getAll(Pageable pageable) {
+        return tagRepository.findAll(pageable)
+                .map(tagMapper::toResponse);
     }
 
     @Transactional
@@ -77,37 +87,6 @@ public class TagService {
         log.debug("Updated tag: id={}", id);
 
         return tagMapper.toResponse(tag);
-    }
-
-    @Transactional
-    public TagResponse updateSlug(UUID id, @Valid ReplaceSlugRequest request) {
-        var tag = tagRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Tag with id " + id + " not found"));
-
-        if (tagRepository.existsBySlugAndIdNot(request.slug(), id)) {
-            throw new ResourceAlreadyExistsException("Tag with slug '" + request + "' already exists");
-        }
-
-        tag.setSlug(request.slug());
-        tag = tagRepository.save(tag);
-        return tagMapper.toResponse(tag);
-    }
-
-    public TagResponse getById(UUID id) {
-        return tagRepository.findById(id)
-                .map(tagMapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Tag with id " + id + " not found"));
-    }
-
-    public TagResponse getBySlug(String slug) {
-        return tagRepository.findBySlug(slug)
-                .map(tagMapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Tag with slug '" + slug + "' not found"));
-    }
-
-    public Page<TagResponse> getAll(Pageable pageable) {
-        return tagRepository.findAll(pageable)
-                .map(tagMapper::toResponse);
     }
 
     @Transactional

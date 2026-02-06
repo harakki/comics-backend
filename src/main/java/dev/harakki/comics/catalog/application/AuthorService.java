@@ -7,7 +7,6 @@ import dev.harakki.comics.catalog.domain.Author;
 import dev.harakki.comics.catalog.dto.AuthorCreateRequest;
 import dev.harakki.comics.catalog.dto.AuthorResponse;
 import dev.harakki.comics.catalog.dto.AuthorUpdateRequest;
-import dev.harakki.comics.catalog.dto.ReplaceSlugRequest;
 import dev.harakki.comics.catalog.infrastructure.AuthorMapper;
 import dev.harakki.comics.catalog.infrastructure.AuthorRepository;
 import dev.harakki.comics.media.api.MediaDeleteRequestedEvent;
@@ -16,7 +15,6 @@ import dev.harakki.comics.shared.exception.ResourceAlreadyExistsException;
 import dev.harakki.comics.shared.exception.ResourceInUseException;
 import dev.harakki.comics.shared.exception.ResourceNotFoundException;
 import dev.harakki.comics.shared.utils.SecurityUtils;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -53,10 +51,18 @@ public class AuthorService {
 
         var author = authorMapper.toEntity(request);
 
-        // Generate and set unique slug
-        String slug = slugGenerator.generate(author.getName(), authorRepository::existsBySlug);
+        // Process slug
+        var slug = request.slug();
+        if (slug != null && !slug.isBlank()) {
+            if (authorRepository.existsBySlug(slug)) {
+                throw new ResourceAlreadyExistsException("Author with slug " + slug + " already exists");
+            }
+        } else {
+            slug = slugGenerator.generate(request.name(), authorRepository::existsBySlug);
+        }
         author.setSlug(slug);
 
+        // Process main cover media
         if (request.mainCoverMediaId() != null) {
             eventPublisher.publishEvent(new MediaFixateRequestedEvent(request.mainCoverMediaId()));
         }
@@ -75,16 +81,29 @@ public class AuthorService {
         return authorMapper.toResponse(author);
     }
 
+    public AuthorResponse getById(UUID id) {
+        return authorRepository.findById(id)
+                .map(authorMapper::toResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("Author with id " + id + " not found"));
+
+    }
+
+    public Page<AuthorResponse> getAll(Specification<Author> spec, Pageable pageable) {
+        return authorRepository.findAll(spec, pageable)
+                .map(authorMapper::toResponse);
+    }
+
     @Transactional
     public AuthorResponse update(UUID id, AuthorUpdateRequest request) {
         var author = authorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Author with id " + id + " not found"));
 
         var oldMediaId = author.getMainCoverMediaId();
+        var newMediaId = request.mainCoverMediaId();
 
         author = authorMapper.partialUpdate(request, author);
-        var newMediaId = author.getMainCoverMediaId();
 
+        // Process main cover media change
         if (!Objects.equals(oldMediaId, newMediaId)) {
             if (newMediaId != null) {
                 eventPublisher.publishEvent(new MediaFixateRequestedEvent(newMediaId));
@@ -94,6 +113,11 @@ public class AuthorService {
             }
         }
 
+        // Process slug change
+        if (request.slug() != null && authorRepository.existsBySlugAndIdNot(request.slug(), id)) {
+            throw new ResourceAlreadyExistsException("Author with slug " + request.slug() + " already exists");
+        }
+
         author = authorRepository.save(author);
         log.debug("Updated author: id={}", id);
 
@@ -101,42 +125,6 @@ public class AuthorService {
         eventPublisher.publishEvent(new AuthorUpdatedEvent(author.getId(), userId));
 
         return authorMapper.toResponse(author);
-    }
-
-    @Transactional
-    public AuthorResponse updateSlug(UUID id, @Valid ReplaceSlugRequest request) {
-        var author = authorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Author with id " + id + " not found"));
-
-        if (authorRepository.existsBySlugAndIdNot(request.slug(), id)) {
-            throw new ResourceAlreadyExistsException("Author with slug " + request.slug() + " already exists");
-        }
-
-        author.setSlug(request.slug());
-        author = authorRepository.save(author);
-
-        var userId = SecurityUtils.getOptionalCurrentUserId().orElse(null);
-        eventPublisher.publishEvent(new AuthorUpdatedEvent(author.getId(), userId));
-
-        return authorMapper.toResponse(author);
-    }
-
-    public AuthorResponse getById(UUID id) {
-        return authorRepository.findById(id)
-                .map(authorMapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Author with id " + id + " not found"));
-
-    }
-
-    public AuthorResponse getBySlug(String slug) {
-        return authorRepository.findBySlug(slug)
-                .map(authorMapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Author with slug " + slug + " not found"));
-    }
-
-    public Page<AuthorResponse> getAll(Specification<Author> spec, Pageable pageable) {
-        return authorRepository.findAll(spec, pageable)
-                .map(authorMapper::toResponse);
     }
 
     @Transactional

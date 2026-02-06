@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,8 +20,7 @@ public interface UserLibraryApi {
 
     @Operation(
             operationId = "getUserLibrary",
-            summary = "Get user's public library",
-            description = "View another user's library entries."
+            summary = "Get user's public library"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Library entries retrieved",
@@ -29,7 +29,7 @@ public interface UserLibraryApi {
             @ApiResponse(responseCode = "404", ref = "NotFound")
     })
     Page<LibraryEntryResponse> getUserLibrary(
-            @Parameter(description = "User UUID", required = true) UUID userId,
+            @Parameter(description = "User UUID", required = true) @NotNull UUID userId,
             @ParameterObject Pageable pageable
     );
 

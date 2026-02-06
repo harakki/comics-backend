@@ -15,5 +15,6 @@ public record ChapterDetailsResponse(
         String displayNumber,
         String name,
         List<PageResponse> pages
+        // TODO: add prevChapterId and nextChapterId
 ) implements Serializable {
 }

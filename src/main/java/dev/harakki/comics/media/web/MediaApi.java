@@ -9,16 +9,28 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-@Tag(name = "Media", description = "S3 Object Storage management via Presigned URLs.")
+@Tag(name = "Media", description = "S3 objects management")
 public interface MediaApi {
 
     @Operation(
+            operationId = "getMediaUrl",
+            summary = "Get Download Presigned URL"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "URL retrieved",
+                    content = @Content(schema = @Schema(type = "string", example = "https://s3.aws.com/bucket/uploads/uuid/cover.jpg?signature=..."))),
+            @ApiResponse(responseCode = "404", ref = "NotFound")
+    })
+    String getMediaUrl(@Parameter(description = "Media UUID", required = true) @NotNull UUID id);
+
+    @Operation(
             operationId = "generateUploadUrl",
-            summary = "Generate Upload Presigned URL",
-            description = "Get a temporary URL to upload a file directly to S3 storage. Client should perform a PUT request to the returned 'url'."
+            summary = "Get Upload Presigned URL"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Presigned URL generated",
@@ -27,24 +39,11 @@ public interface MediaApi {
             @ApiResponse(responseCode = "401", ref = "Unauthorized"),
             @ApiResponse(responseCode = "403", ref = "Forbidden")
     })
-    MediaUploadUrlResponse createMedia(MediaUploadUrlRequest request);
-
-    @Operation(
-            operationId = "getMediaUrl",
-            summary = "Get Download Presigned URL",
-            description = "Generate a temporary public URL to access a private media file."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "URL retrieved",
-                    content = @Content(schema = @Schema(type = "string", example = "https://s3.aws.com/bucket/uploads/uuid/cover.jpg?signature=..."))),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
-    String getMediaUrl(@Parameter(description = "Media UUID", required = true) UUID id);
+    MediaUploadUrlResponse createMedia(@Valid MediaUploadUrlRequest request);
 
     @Operation(
             operationId = "deleteMedia",
-            summary = "Delete media",
-            description = "Remove media record from DB and schedule S3 deletion."
+            summary = "Delete media"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Media deleted"),
@@ -52,6 +51,6 @@ public interface MediaApi {
             @ApiResponse(responseCode = "403", ref = "Forbidden"),
             @ApiResponse(responseCode = "404", ref = "NotFound")
     })
-    void deleteMedia(@Parameter(description = "Media UUID", required = true) UUID id);
+    void deleteMedia(@Parameter(description = "Media UUID", required = true) @NotNull UUID id);
 
 }

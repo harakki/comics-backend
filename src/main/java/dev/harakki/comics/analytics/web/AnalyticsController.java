@@ -13,12 +13,12 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping(path = "/api/v1/analytics", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/api/v1/", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AnalyticsController implements AnalyticsApi {
 
     private final AnalyticsService analyticsService;
 
-    @GetMapping("/titles/{titleId}")
+    @GetMapping("/titles/{titleId}/analytics")
     public TitleAnalyticsResponse getTitleAnalytics(@PathVariable UUID titleId) {
         return analyticsService.getTitleAnalytics(titleId);
     }

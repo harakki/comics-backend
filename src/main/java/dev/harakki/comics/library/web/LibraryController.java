@@ -2,11 +2,8 @@ package dev.harakki.comics.library.web;
 
 import dev.harakki.comics.library.application.LibraryService;
 import dev.harakki.comics.library.domain.LibraryEntry;
-import dev.harakki.comics.library.dto.LibraryEntryCreateRequest;
 import dev.harakki.comics.library.dto.LibraryEntryResponse;
 import dev.harakki.comics.library.dto.LibraryEntryUpdateRequest;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.kaczmarzyk.spring.data.jpa.domain.Equal;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
@@ -23,24 +20,28 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('USER')")
 @RestController
 @RequestMapping(path = "/api/v1/library", produces = MediaType.APPLICATION_JSON_VALUE)
 class LibraryController implements LibraryApi {
 
     private final LibraryService libraryService;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public LibraryEntryResponse addToLibrary(@RequestBody @Valid LibraryEntryCreateRequest request) {
-        return libraryService.addToLibrary(request);
+    @PreAuthorize("hasRole('USER')")
+    @PutMapping("/titles/{titleId}")
+    public LibraryEntryResponse addOrUpdateLibraryEntry(
+            @PathVariable UUID titleId,
+            @RequestBody LibraryEntryUpdateRequest request
+    ) {
+        return libraryService.addOrUpdateLibraryEntry(titleId, request);
     }
 
-    @GetMapping("/{entryId}")
-    public LibraryEntryResponse getEntry(@PathVariable @NotNull UUID entryId) {
-        return libraryService.getById(entryId);
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/{titleId}")
+    public LibraryEntryResponse getLibraryEntry(@PathVariable UUID titleId) {
+        return libraryService.getById(titleId);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping
     public Page<LibraryEntryResponse> getMyLibrary(
             @And({
@@ -52,18 +53,18 @@ class LibraryController implements LibraryApi {
         return libraryService.searchLibrary(spec, pageable);
     }
 
-    @PutMapping("/{entryId}")
-    public LibraryEntryResponse updateEntry(
-            @PathVariable UUID entryId,
-            @RequestBody @Valid LibraryEntryUpdateRequest request
-    ) {
-        return libraryService.update(entryId, request);
-    }
-
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{entryId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeFromLibrary(@PathVariable UUID entryId) {
+    public void deleteLibraryEntry(@PathVariable UUID entryId) {
         libraryService.removeFromLibrary(entryId);
     }
+
+    // TODO эндпоинт Reading Progress POST /api/v1/library/{titleId}/progress (или PATCH /library/entry)
+    // Бэкенд сам должен
+    // Найти или создать запись в библиотеке для этого юзера и тайтла.
+    // Обновить lastReadChapterId.
+    // Автоматически переключить статус на READING (если он был TO_READ).
+    // (Опционально) Вернуть ID следующей главы в ответе.
 
 }

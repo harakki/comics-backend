@@ -58,7 +58,6 @@ public class AnalyticsService {
                 .type(InteractionType.CHAPTER_READ)
                 .targetId(event.chapterId()) // Target -> chapterId
                 .metadata(Map.of(
-                        "titleId", event.titleId(),
                         "readTimeMillis", event.readTimeMillis()
                 ))
                 .build();

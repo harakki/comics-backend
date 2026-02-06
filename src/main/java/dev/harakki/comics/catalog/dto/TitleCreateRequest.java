@@ -16,6 +16,7 @@ import java.util.UUID;
 @Builder
 public record TitleCreateRequest(
         @NotBlank String name,
+        String slug,
         String description,
         @NotNull TitleType type,
         @NotNull TitleStatus titleStatus,

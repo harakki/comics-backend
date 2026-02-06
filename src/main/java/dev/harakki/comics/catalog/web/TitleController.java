@@ -3,10 +3,10 @@ package dev.harakki.comics.catalog.web;
 import dev.harakki.comics.catalog.application.TitleService;
 import dev.harakki.comics.catalog.domain.Title;
 import dev.harakki.comics.catalog.domain.Title_;
-import dev.harakki.comics.catalog.dto.*;
+import dev.harakki.comics.catalog.dto.TitleCreateRequest;
+import dev.harakki.comics.catalog.dto.TitleResponse;
+import dev.harakki.comics.catalog.dto.TitleUpdateRequest;
 import jakarta.persistence.criteria.JoinType;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import net.kaczmarzyk.spring.data.jpa.domain.*;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
@@ -31,34 +31,13 @@ class TitleController implements TitleApi {
 
     private final TitleService titleService;
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public TitleResponse createTitle(@RequestBody @Valid TitleCreateRequest request) {
-        return titleService.create(request);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{id}")
-    public TitleResponse updateTitle(
-            @PathVariable @NotNull UUID id,
-            @RequestBody @Valid TitleUpdateRequest request
-    ) {
-        return titleService.update(id, request);
-    }
-
     @GetMapping("/{id}")
-    public TitleResponse getTitle(@PathVariable @NotNull UUID id) {
+    public TitleResponse getTitle(@PathVariable UUID id) {
         return titleService.getById(id);
     }
 
-    @GetMapping("/slug/{slug}")
-    public TitleResponse getTitleBySlug(@PathVariable @NotNull String slug) {
-        return titleService.getBySlug(slug);
-    }
-
     @GetMapping
-    public Page<TitleResponse> getAllTitles(
+    public Page<TitleResponse> getTitles(
             @Or({
                     @Spec(path = Title_.NAME, params = "search", spec = LikeIgnoreCase.class),
                     @Spec(path = Title_.SLUG, params = "search", spec = LikeIgnoreCase.class)
@@ -81,52 +60,26 @@ class TitleController implements TitleApi {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public TitleResponse createTitle(@RequestBody TitleCreateRequest request) {
+        return titleService.create(request);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}")
+    public TitleResponse updateTitle(
+            @PathVariable UUID id,
+            @RequestBody TitleUpdateRequest request
+    ) {
+        return titleService.update(id, request);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTitle(@PathVariable @NotNull UUID id) {
+    public void deleteTitle(@PathVariable UUID id) {
         titleService.delete(id);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}" + "/slug")
-    public TitleResponse updateTitleSlug(
-            @PathVariable @NotNull UUID id,
-            @RequestBody @Valid ReplaceSlugRequest request
-    ) {
-        return titleService.updateSlug(id, request);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{id}" + "/authors")
-    public TitleResponse addAuthor(
-            @PathVariable @NotNull UUID id,
-            @RequestBody @Valid TitleAddAuthorRequest request
-    ) {
-        return titleService.addAuthor(id, request.authorId(), request.role());
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}" + "/authors/{authorId}")
-    public TitleResponse removeAuthor(
-            @PathVariable @NotNull UUID id,
-            @PathVariable @NotNull UUID authorId
-    ) {
-        return titleService.removeAuthor(id, authorId);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}" + "/publisher")
-    public TitleResponse removePublisher(@PathVariable @NotNull UUID id) {
-        return titleService.removePublisher(id);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{id}" + "/tags")
-    public TitleResponse updateTags(
-            @PathVariable @NotNull UUID id,
-            @RequestBody @Valid ReplaceTagsRequest request
-    ) {
-        return titleService.updateTags(id, request);
     }
 
 }

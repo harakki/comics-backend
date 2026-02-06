@@ -13,6 +13,7 @@ import dev.harakki.comics.library.infrastructure.LibraryEntryRepository;
 import dev.harakki.comics.shared.exception.ResourceAlreadyExistsException;
 import dev.harakki.comics.shared.exception.ResourceNotFoundException;
 import dev.harakki.comics.shared.utils.SecurityUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -38,62 +39,54 @@ public class LibraryService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public LibraryEntryResponse addToLibrary(LibraryEntryCreateRequest request) {
+    public LibraryEntryResponse addOrUpdateLibraryEntry(UUID titleId, @Valid LibraryEntryUpdateRequest request) {
         UUID currentUserId = getCurrentUserId();
 
-        if (libraryEntryRepository.existsByUserIdAndTitleId(currentUserId, request.titleId())) {
-            throw new ResourceAlreadyExistsException("Title already exists in library");
-        }
+        var existingEntry = libraryEntryRepository.findByUserIdAndTitleId(currentUserId, titleId);
 
-        var entry = libraryEntryMapper.toEntity(request);
-        entry.setUserId(currentUserId);
+        if (existingEntry.isPresent()) {
+            var entry = existingEntry.get();
+            var oldVote = entry.getVote();
 
-        try {
+            entry = libraryEntryMapper.partialUpdate(request, entry);
             entry = libraryEntryRepository.save(entry);
-            libraryEntryRepository.flush();
 
-            eventPublisher.publishEvent(new LibraryAddTitleEvent(request.titleId(), currentUserId));
-            log.info("Added title {} to library for user {}", request.titleId(), currentUserId);
-        } catch (DataIntegrityViolationException e) {
-            throw new ResourceAlreadyExistsException("Title already exists in library");
+            log.debug("Updated library entry via addOrUpdate: titleId={}", titleId);
+
+            var newVote = entry.getVote();
+            if (newVote != null && !newVote.equals(oldVote)) {
+                eventPublisher.publishEvent(new LibraryVoteTitleEvent(entry.getTitleId(), currentUserId, newVote));
+                log.debug("Published TitleVoteEvent for updated library entry: titleId={}, userId={}, rating={}",
+                        entry.getTitleId(), currentUserId, newVote);
+            }
+
+            return libraryEntryMapper.toResponse(entry);
+        } else {
+            var entry = new LibraryEntry();
+            entry.setUserId(currentUserId);
+            entry.setTitleId(titleId);
+
+            // Применить данные из request
+            entry = libraryEntryMapper.partialUpdate(request, entry);
+
+            try {
+                entry = libraryEntryRepository.save(entry);
+                libraryEntryRepository.flush();
+
+                eventPublisher.publishEvent(new LibraryAddTitleEvent(titleId, currentUserId));
+                log.info("Added title {} to library for user {} via addOrUpdate", titleId, currentUserId);
+            } catch (DataIntegrityViolationException e) {
+                throw new ResourceAlreadyExistsException("Title already exists in library");
+            }
+
+            if (entry.getVote() != null) {
+                eventPublisher.publishEvent(new LibraryVoteTitleEvent(titleId, currentUserId, entry.getVote()));
+                log.debug("Published TitleVoteEvent for new library entry: titleId={}, userId={}, rating={}",
+                        titleId, currentUserId, entry.getVote());
+            }
+
+            return libraryEntryMapper.toResponse(entry);
         }
-
-        // If initial rating provided, publish analytics event
-        if (request.vote() != null) {
-            eventPublisher.publishEvent(new LibraryVoteTitleEvent(request.titleId(), currentUserId, request.vote()));
-            log.debug("Published TitleVoteEvent for new library entry: titleId={}, userId={}, rating={}",
-                    request.titleId(), currentUserId, request.vote());
-        }
-
-        return libraryEntryMapper.toResponse(entry);
-    }
-
-    @Transactional
-    public LibraryEntryResponse update(UUID entryId, LibraryEntryUpdateRequest request) {
-        UUID currentUserId = getCurrentUserId();
-
-        var entry = libraryEntryRepository.findById(entryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Library entry not found"));
-
-        if (!entry.getUserId().equals(currentUserId)) {
-            throw new AccessDeniedException("You don't have permission to update this entry");
-        }
-
-        var oldVote = entry.getVote();
-        entry = libraryEntryMapper.partialUpdate(request, entry);
-        entry = libraryEntryRepository.save(entry);
-
-        log.debug("Updated library entry: id={}", entryId);
-
-        // If vote changed, publish analytics event
-        var newVote = entry.getVote();
-        if (newVote != null && !newVote.equals(oldVote)) {
-            eventPublisher.publishEvent(new LibraryVoteTitleEvent(entry.getTitleId(), currentUserId, newVote));
-            log.debug("Published TitleVoteEvent for updated library entry: titleId={}, userId={}, rating={}",
-                    entry.getTitleId(), currentUserId, newVote);
-        }
-
-        return libraryEntryMapper.toResponse(entry);
     }
 
     @Transactional

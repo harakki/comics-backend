@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,26 +22,29 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.UUID;
 
 @Tag(name = "Library", description = "User's personal library management")
+// @SecurityRequirement(name = "bearer-jwt")
 public interface LibraryApi {
 
     @Operation(
-            operationId = "addToLibrary",
-            summary = "Add title to library",
-            description = "Add title to the authenticated user's library."
+            operationId = "addOrUpdateLibraryEntry",
+            summary = "Add or update library entry"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Title added to library",
+            @ApiResponse(responseCode = "200", description = "Library entry added or updated",
                     content = @Content(schema = @Schema(implementation = LibraryEntryResponse.class))),
             @ApiResponse(responseCode = "400", ref = "BadRequest"),
             @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "409", ref = "Conflict")
+            @ApiResponse(responseCode = "403", ref = "Forbidden"),
+            @ApiResponse(responseCode = "404", ref = "NotFound")
     })
-    LibraryEntryResponse addToLibrary(LibraryEntryCreateRequest request);
+    LibraryEntryResponse addOrUpdateLibraryEntry(
+            @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId,
+            @Valid LibraryEntryUpdateRequest request
+    );
 
     @Operation(
-            operationId = "getLibraryEntryById",
-            summary = "Get library entry by ID",
-            description = "Retrieve a specific library entry."
+            operationId = "getLibraryEntry",
+            summary = "Get library entry"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Library entry found",
@@ -47,12 +52,11 @@ public interface LibraryApi {
             @ApiResponse(responseCode = "401", ref = "Unauthorized"),
             @ApiResponse(responseCode = "404", ref = "NotFound")
     })
-    LibraryEntryResponse getEntry(@Parameter(description = "Library entry UUID", required = true) UUID entryId);
+    LibraryEntryResponse getLibraryEntry(@Parameter(description = "Library entry UUID", required = true) @NotNull UUID entryId);
 
     @Operation(
             operationId = "getMyLibrary",
-            summary = "Get my library",
-            description = "Retrieve the authenticated user's library with optional filters."
+            summary = "Get my library"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Library entries retrieved",
@@ -65,27 +69,8 @@ public interface LibraryApi {
     );
 
     @Operation(
-            operationId = "updateLibraryEntry",
-            summary = "Update library entry",
-            description = "Update reading status, rating, or progress of a title."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Library entry updated",
-                    content = @Content(schema = @Schema(implementation = LibraryEntryResponse.class))),
-            @ApiResponse(responseCode = "400", ref = "BadRequest"),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "403", ref = "Forbidden"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
-    LibraryEntryResponse updateEntry(
-            @Parameter(description = "Library entry UUID", required = true) UUID entryId,
-            LibraryEntryUpdateRequest request
-    );
-
-    @Operation(
-            operationId = "removeFromLibrary",
-            summary = "Remove from library",
-            description = "Remove a title from the user's library."
+            operationId = "deleteLibraryEntry",
+            summary = "Delete library entry"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Title removed from library"),
@@ -93,6 +78,6 @@ public interface LibraryApi {
             @ApiResponse(responseCode = "403", ref = "Forbidden"),
             @ApiResponse(responseCode = "404", ref = "NotFound")
     })
-    void removeFromLibrary(@Parameter(description = "Library entry UUID", required = true) UUID entryId);
+    void deleteLibraryEntry(@Parameter(description = "Library entry UUID", required = true) @NotNull UUID entryId);
 
 }

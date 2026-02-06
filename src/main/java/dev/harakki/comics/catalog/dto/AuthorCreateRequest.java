@@ -10,6 +10,7 @@ import java.util.UUID;
 @Builder
 public record AuthorCreateRequest(
         @NotBlank String name,
+        String slug,
         String description,
         List<String> websiteUrls,
         @Size(min = 2, max = 2) String countryIsoCode,

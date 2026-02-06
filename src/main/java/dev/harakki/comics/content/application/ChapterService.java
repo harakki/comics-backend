@@ -184,25 +184,22 @@ public class ChapterService {
     }
 
     @Transactional
-    public void recordChapterRead(UUID chapterId, UUID titleId, ChapterReadRequest request) {
+    public void recordChapterRead(UUID chapterId, ChapterReadRequest request) {
         if (!chapterRepository.existsById(chapterId)) {
             throw new ResourceNotFoundException("Chapter with id " + chapterId + " not found");
         }
 
-        var userId = SecurityUtils.getOptionalCurrentUserId().orElse(null);
-
         var event = new ChapterReadEvent(
-                titleId,
-                userId,
+                request.userId(),
                 chapterId,
                 request.readTimeMillis()
         );
 
         eventPublisher.publishEvent(event);
-        log.info("Published chapter read event: chapterId={}, userId={}", chapterId, userId);
+        log.info("Published chapter read event: chapterId={}, userId={}", chapterId, request.userId());
     }
 
-    public ChapterReadStatusResponse isChapterRead(UUID chapterId, UUID titleId) {
+    public ChapterReadStatusResponse isChapterRead(UUID chapterId) {
         if (!chapterRepository.existsById(chapterId)) {
             throw new ResourceNotFoundException("Chapter not found");
         }

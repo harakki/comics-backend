@@ -8,22 +8,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-@Tag(name = "Analytics", description = "Analytics API for interaction statistics.")
+@Tag(name = "Analytics", description = "User interactions statistics")
 public interface AnalyticsApi {
 
     @Operation(
             operationId = "getTitleAnalytics",
-            summary = "Get title analytics",
-            description = "Retrieve analytics data for a specific title."
+            summary = "Get analytics for title"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Analytics data retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = TitleAnalyticsResponse.class))),
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = TitleAnalyticsResponse.class))),
             @ApiResponse(responseCode = "404", ref = "NotFound")
     })
-    TitleAnalyticsResponse getTitleAnalytics(@Parameter(description = "Title UUID", required = true) UUID titleId);
+    TitleAnalyticsResponse getTitleAnalytics(@Parameter(description = "Title UUID", required = true) @NotNull UUID titleId);
 
 }

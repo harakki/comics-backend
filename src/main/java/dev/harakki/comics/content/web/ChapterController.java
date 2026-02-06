@@ -2,7 +2,6 @@ package dev.harakki.comics.content.web;
 
 import dev.harakki.comics.content.application.ChapterService;
 import dev.harakki.comics.content.dto.*;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,31 +18,31 @@ public class ChapterController implements ChapterApi {
 
     private final ChapterService chapterService;
 
+    @GetMapping("/titles/{titleId}/chapters")
+    public List<ChapterSummaryResponse> getChaptersInfoByTitle(@PathVariable UUID titleId) {
+        return chapterService.getChaptersByTitle(titleId);
+    }
+
+    @GetMapping("/chapters/{chapterId}")
+    public ChapterDetailsResponse getFullChapter(@PathVariable UUID chapterId) {
+        return chapterService.getChapterDetails(chapterId);
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/titles/{titleId}/chapters")
     @ResponseStatus(HttpStatus.CREATED)
     public void createChapter(
             @PathVariable UUID titleId,
-            @RequestBody @Valid ChapterCreateRequest request
+            @RequestBody ChapterCreateRequest request
     ) {
         chapterService.create(titleId, request);
     }
 
-    @GetMapping("/titles/{titleId}/chapters")
-    public List<ChapterSummaryResponse> getTitleChapters(@PathVariable UUID titleId) {
-        return chapterService.getChaptersByTitle(titleId);
-    }
-
-    @GetMapping("/chapters/{chapterId}")
-    public ChapterDetailsResponse getChapterDetails(@PathVariable UUID chapterId) {
-        return chapterService.getChapterDetails(chapterId);
-    }
-
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/chapters/{chapterId}")
+    @PatchMapping("/chapters/{chapterId}")
     public void updateChapter(
             @PathVariable UUID chapterId,
-            @RequestBody @Valid ChapterUpdateRequest request
+            @RequestBody ChapterUpdateRequest request
     ) {
         chapterService.updateMetadata(chapterId, request);
     }
@@ -53,16 +52,6 @@ public class ChapterController implements ChapterApi {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteChapter(@PathVariable UUID chapterId) {
         chapterService.delete(chapterId);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/chapters/{chapterId}/pages")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updatePages(
-            @PathVariable UUID chapterId,
-            @RequestBody @Valid ChapterPagesUpdateRequest request
-    ) {
-        chapterService.updatePages(chapterId, request.pages());
     }
 
 }

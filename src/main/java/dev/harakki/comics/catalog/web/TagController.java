@@ -5,8 +5,6 @@ import dev.harakki.comics.catalog.dto.ReplaceSlugRequest;
 import dev.harakki.comics.catalog.dto.TagCreateRequest;
 import dev.harakki.comics.catalog.dto.TagResponse;
 import dev.harakki.comics.catalog.dto.TagUpdateRequest;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,45 +23,34 @@ class TagController implements TagApi {
 
     private final TagService tagService;
 
+    @GetMapping("/{id}")
+    public TagResponse getTag(@PathVariable UUID id) {
+        return tagService.getById(id);
+    }
+
+    @GetMapping
+    public Page<TagResponse> getTags(@PageableDefault(sort = "name") Pageable pageable) {
+        return tagService.getAll(pageable);
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TagResponse createTag(@RequestBody @Valid TagCreateRequest request) {
+    public TagResponse createTag(@RequestBody TagCreateRequest request) {
         return tagService.create(request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
-    public TagResponse updateTag(@PathVariable @NotNull UUID id, @RequestBody @Valid TagUpdateRequest request) {
+    @PatchMapping("/{id}")
+    public TagResponse updateTag(@PathVariable UUID id, @RequestBody TagUpdateRequest request) {
         return tagService.update(id, request);
-    }
-
-    @GetMapping("/{id}")
-    public TagResponse getTag(@PathVariable @NotNull UUID id) {
-        return tagService.getById(id);
-    }
-
-    @GetMapping("/slug/{slug}")
-    public TagResponse getTagBySlug(@PathVariable String slug) {
-        return tagService.getBySlug(slug);
-    }
-
-    @GetMapping
-    public Page<TagResponse> getAllTags(@PageableDefault(sort = "name") Pageable pageable) {
-        return tagService.getAll(pageable);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTag(@PathVariable @NotNull UUID id) {
+    public void deleteTag(@PathVariable UUID id) {
         tagService.delete(id);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}" + "/slug")
-    public TagResponse updateTagSlug(@PathVariable @NotNull UUID id, @RequestBody @Valid ReplaceSlugRequest request) {
-        return tagService.updateSlug(id, request);
     }
 
 }

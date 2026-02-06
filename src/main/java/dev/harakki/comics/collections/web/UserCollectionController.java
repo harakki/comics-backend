@@ -4,8 +4,6 @@ import dev.harakki.comics.collections.application.CollectionService;
 import dev.harakki.comics.collections.dto.CollectionCreateRequest;
 import dev.harakki.comics.collections.dto.CollectionUpdateRequest;
 import dev.harakki.comics.collections.dto.UserCollectionResponse;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,20 +23,13 @@ public class UserCollectionController implements UserCollectionApi {
 
     private final CollectionService collectionService;
 
-    @PreAuthorize("hasRole('USER')")
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserCollectionResponse create(@RequestBody @Valid CollectionCreateRequest request) {
-        return collectionService.create(request);
-    }
-
     @GetMapping("/{id}")
-    public UserCollectionResponse getById(@PathVariable @NotNull UUID id) {
+    public UserCollectionResponse getCollection(@PathVariable UUID id) {
         return collectionService.getById(id);
     }
 
     @GetMapping
-    public Page<UserCollectionResponse> search(
+    public Page<UserCollectionResponse> getCollections(
             @RequestParam(required = false) String search,
             @PageableDefault(size = 20) Pageable pageable
     ) {
@@ -55,10 +46,17 @@ public class UserCollectionController implements UserCollectionApi {
     }
 
     @PreAuthorize("hasRole('USER')")
-    @PutMapping("/{id}")
-    public UserCollectionResponse update(
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserCollectionResponse createCollection(@RequestBody CollectionCreateRequest request) {
+        return collectionService.create(request);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @PatchMapping("/{id}")
+    public UserCollectionResponse updateCollection(
             @PathVariable UUID id,
-            @RequestBody @Valid CollectionUpdateRequest request
+            @RequestBody CollectionUpdateRequest request
     ) {
         return collectionService.update(id, request);
     }
@@ -66,43 +64,8 @@ public class UserCollectionController implements UserCollectionApi {
     @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable UUID id) {
+    public void deleteCollection(@PathVariable UUID id) {
         collectionService.delete(id);
-    }
-
-    @PreAuthorize("hasRole('USER')")
-    @PostMapping("/{id}" + "/share")
-    public UserCollectionResponse generateShareLink(@PathVariable @NotNull UUID id) {
-        return collectionService.generateShareToken(id);
-    }
-
-    @GetMapping("/shared/{shareToken}")
-    public UserCollectionResponse getByShareToken(@PathVariable @NotNull String shareToken) {
-        return collectionService.getByShareToken(shareToken);
-    }
-
-    @PreAuthorize("hasRole('USER')")
-    @DeleteMapping("/{id}" + "/share")
-    public UserCollectionResponse revokeShareLink(@PathVariable @NotNull UUID id) {
-        return collectionService.revokeShareToken(id);
-    }
-
-    @PreAuthorize("hasRole('USER')")
-    @PostMapping("/{id}" + "/titles")
-    public UserCollectionResponse addTitles(
-            @PathVariable UUID id,
-            @RequestBody List<UUID> titleIds
-    ) {
-        return collectionService.addTitles(id, titleIds);
-    }
-
-    @PreAuthorize("hasRole('USER')")
-    @DeleteMapping("/{id}" + "/titles/{titleId}")
-    public UserCollectionResponse removeTitle(
-            @PathVariable UUID id,
-            @PathVariable UUID titleId
-    ) {
-        return collectionService.removeTitle(id, titleId);
     }
 
 }
