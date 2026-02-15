@@ -44,9 +44,6 @@ public class Collection {
     @Column(nullable = false)
     private Boolean isPublic = false;
 
-    @Column(unique = true)
-    private String shareToken;
-
     @Builder.Default
     @ElementCollection
     @CollectionTable(name = "collection_titles", joinColumns = @JoinColumn(name = "collection_id"))

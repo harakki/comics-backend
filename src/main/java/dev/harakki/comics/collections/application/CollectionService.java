@@ -29,7 +29,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class CollectionService {
+public class CollectionService { // TODO доступ к коллекции по ссылке с id, а не по токену
 
     private final CollectionRepository collectionRepository;
     private final CollectionMapper collectionMapper;
@@ -139,50 +139,7 @@ public class CollectionService {
         log.info("Deleted collection: id={} by user {}", id, currentUserId);
     }
 
-    @Transactional
-    public UserCollectionResponse generateShareToken(UUID id) {
-        UUID currentUserId = getCurrentUserId();
-
-        var entity = collectionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Collection not found"));
-
-        if (!entity.getAuthorId().equals(currentUserId)) {
-            throw new AccessDeniedException("You don't have permission to share this collection");
-        }
-
-        // Generate a unique token
-        String token = generateUniqueToken();
-        entity.setShareToken(token);
-        entity = collectionRepository.save(entity);
-
-        log.info("Generated share token for collection: id={} by user {}", id, currentUserId);
-        return collectionMapper.toResponse(entity);
-    }
-
-    public UserCollectionResponse getByShareToken(String shareToken) {
-        return collectionRepository.findByShareToken(shareToken)
-                .map(collectionMapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Collection not found or link expired"));
-    }
-
-    @Transactional
-    public UserCollectionResponse revokeShareToken(UUID id) {
-        UUID currentUserId = getCurrentUserId();
-
-        var entity = collectionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Collection not found"));
-
-        if (!entity.getAuthorId().equals(currentUserId)) {
-            throw new AccessDeniedException("You don't have permission to revoke share link");
-        }
-
-        entity.setShareToken(null);
-        entity = collectionRepository.save(entity);
-
-        log.info("Revoked share token for collection: id={} by user {}", id, currentUserId);
-        return collectionMapper.toResponse(entity);
-    }
-
+    // TODO переделать в addTitle(...)
     public UserCollectionResponse addTitles(UUID id, List<UUID> titleIds) {
         var currentUserId = getCurrentUserId();
         var existing = getById(id);
@@ -218,17 +175,6 @@ public class CollectionService {
 
     private UUID getCurrentUserId() {
         return SecurityUtils.getCurrentUserId();
-    }
-
-    private String generateUniqueToken() {
-        SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[24];
-        String token;
-        do {
-            random.nextBytes(bytes);
-            token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-        } while (collectionRepository.existsByShareToken(token));
-        return token;
     }
 
 }

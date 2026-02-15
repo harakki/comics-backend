@@ -20,8 +20,4 @@ public interface CollectionRepository extends JpaRepository<Collection, UUID> {
 
     boolean existsByAuthorIdAndNameAndIdNot(UUID authorId, String name, UUID id);
 
-    Optional<Collection> findByShareToken(String shareToken);
-
-    boolean existsByShareToken(String shareToken);
-
 }
