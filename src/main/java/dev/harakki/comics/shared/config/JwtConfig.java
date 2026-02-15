@@ -1,13 +1,19 @@
 package dev.harakki.comics.shared.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +21,28 @@ import java.util.stream.Stream;
 
 @Configuration
 public class JwtConfig {
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
+    private String jwkSetUri;
+
+    @Value("${auth.jwt.connect-timeout:2s}")
+    private Duration connectTimeout;
+
+    @Value("${auth.jwt.read-timeout:2s}")
+    private Duration readTimeout;
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        var factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(connectTimeout);
+        factory.setReadTimeout(readTimeout);
+
+        var restTemplate = new RestTemplate(factory);
+
+        return NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
+                .restOperations(restTemplate)
+                .build();
+    }
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
