@@ -183,20 +183,22 @@ public class ChapterService {
         log.debug("Updated chapter: id={} metadata", chapterId);
     }
 
+    // TODO recordChapterRead should return nextUnreadChapter
     @Transactional
     public void recordChapterRead(UUID chapterId, ChapterReadRequest request) {
         if (!chapterRepository.existsById(chapterId)) {
             throw new ResourceNotFoundException("Chapter with id " + chapterId + " not found");
         }
 
+        var userId = SecurityUtils.getOptionalCurrentUserId().orElse(null);
         var event = new ChapterReadEvent(
-                request.userId(),
+                userId,
                 chapterId,
                 request.readTimeMillis()
         );
 
         eventPublisher.publishEvent(event);
-        log.info("Published chapter read event: chapterId={}, userId={}", chapterId, request.userId());
+        log.info("Published chapter read event: chapterId={}, userId={}", chapterId, userId);
     }
 
     public ChapterReadStatusResponse isChapterRead(UUID chapterId) {

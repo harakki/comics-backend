@@ -5,7 +5,6 @@ import dev.harakki.comics.library.api.LibraryRemoveTitleEvent;
 import dev.harakki.comics.library.api.LibraryVoteTitleEvent;
 import dev.harakki.comics.library.domain.LibraryEntry;
 import dev.harakki.comics.library.domain.ReadingStatus;
-import dev.harakki.comics.library.dto.LibraryEntryCreateRequest;
 import dev.harakki.comics.library.dto.LibraryEntryResponse;
 import dev.harakki.comics.library.dto.LibraryEntryUpdateRequest;
 import dev.harakki.comics.library.infrastructure.LibraryEntryMapper;
@@ -106,6 +105,7 @@ public class LibraryService {
         log.info("Removed library entry: id={} for user {}", entryId, currentUserId);
     }
 
+    // TODO entry и title IDs создают путаницу, необходимо избавиться от чего-то одного
     public LibraryEntryResponse getById(UUID entryId) {
         UUID currentUserId = getCurrentUserId();
 
