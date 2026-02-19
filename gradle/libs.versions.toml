@@ -1,10 +1,10 @@
 [versions]
-aws-sdk = "2.41.17"
+aws-sdk = "2.41.32"
 mapstruct = "1.6.3"
 lombok-mapstruct-binding = "0.2.0"
-hibernate-jpamodelgen = "7.2.2.Final"
+hibernate-jpamodelgen = "7.2.4.Final"
 specification-arg-resolver = "4.0.0"
-spring-modulith = "2.0.2"
+spring-modulith = "2.0.3"
 uuid-creator = "6.1.1"
 slugify = "3.0.7"
 icu4j = "78.2"
