@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -88,6 +89,52 @@ public interface ChapterApi {
     })
     void deleteChapter(
             @Parameter(description = "Chapter UUID", required = true) @NotNull UUID chapterId
+    );
+
+    @Operation(
+            operationId = "recordChapterRead",
+            summary = "Record chapter as read and get next unread chapter"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Chapter marked as read, next unread chapter returned",
+                    content = @Content(schema = @Schema(implementation = NextChapterResponse.class))),
+            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
+            @ApiResponse(responseCode = "404", ref = "NotFound")
+    })
+    @SecurityRequirement(name = "bearer-jwt")
+    NextChapterResponse recordChapterRead(
+            @Parameter(description = "Chapter UUID", required = true) @NotNull UUID chapterId,
+            @Valid ChapterReadRequest request
+    );
+
+    @Operation(
+            operationId = "isChapterRead",
+            summary = "Check if chapter has been read by current user"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Read status",
+                    content = @Content(schema = @Schema(implementation = ChapterReadStatusResponse.class))),
+            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
+            @ApiResponse(responseCode = "404", ref = "NotFound")
+    })
+    @SecurityRequirement(name = "bearer-jwt")
+    ChapterReadStatusResponse isChapterRead(
+            @Parameter(description = "Chapter UUID", required = true) @NotNull UUID chapterId
+    );
+
+    @Operation(
+            operationId = "getNextUnreadChapter",
+            summary = "Get next unread chapter for a title"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Next unread chapter",
+                    content = @Content(schema = @Schema(implementation = NextChapterResponse.class))),
+            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
+            @ApiResponse(responseCode = "404", ref = "NotFound")
+    })
+    @SecurityRequirement(name = "bearer-jwt")
+    NextChapterResponse getNextUnreadChapter(
+            @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId
     );
 
 }

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
 
@@ -24,5 +25,29 @@ public interface AnalyticsApi {
             @ApiResponse(responseCode = "404", ref = "NotFound")
     })
     TitleAnalyticsResponse getTitleAnalytics(@Parameter(description = "Title UUID", required = true) @NotNull UUID titleId);
+
+    @Operation(
+            operationId = "likeTitle",
+            summary = "Like a title"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Title liked"),
+            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
+            @ApiResponse(responseCode = "404", ref = "NotFound")
+    })
+    @SecurityRequirement(name = "bearer-jwt")
+    void likeTitle(@Parameter(description = "Title UUID", required = true) @NotNull UUID titleId);
+
+    @Operation(
+            operationId = "dislikeTitle",
+            summary = "Dislike a title"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Title disliked"),
+            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
+            @ApiResponse(responseCode = "404", ref = "NotFound")
+    })
+    @SecurityRequirement(name = "bearer-jwt")
+    void dislikeTitle(@Parameter(description = "Title UUID", required = true) @NotNull UUID titleId);
 
 }

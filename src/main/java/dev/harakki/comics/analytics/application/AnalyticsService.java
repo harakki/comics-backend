@@ -14,8 +14,10 @@ import dev.harakki.comics.content.api.ChapterReadEvent;
 import dev.harakki.comics.content.api.ChapterUpdatedEvent;
 import dev.harakki.comics.library.api.LibraryAddTitleEvent;
 import dev.harakki.comics.library.api.LibraryRemoveTitleEvent;
+import dev.harakki.comics.shared.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ import java.util.UUID;
 public class AnalyticsService {
 
     private final UserInteractionRepository userInteractionRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public TitleAnalyticsResponse getTitleAnalytics(UUID titleId) {
         var averageRating = getAverageRatingForTitle(titleId);
@@ -49,6 +52,18 @@ public class AnalyticsService {
 
     public Long getTotalViewCount(UUID titleId) {
         return userInteractionRepository.countByTargetIdAndType(titleId, InteractionType.TITLE_VIEWED);
+    }
+
+    @Transactional
+    public void likeTitle(UUID titleId) {
+        var userId = SecurityUtils.getCurrentUserId();
+        eventPublisher.publishEvent(new TitleLikedEvent(titleId, userId));
+    }
+
+    @Transactional
+    public void dislikeTitle(UUID titleId) {
+        var userId = SecurityUtils.getCurrentUserId();
+        eventPublisher.publishEvent(new TitleDislikedEvent(titleId, userId));
     }
 
     @Transactional

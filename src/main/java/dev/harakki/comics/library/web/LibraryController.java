@@ -4,6 +4,7 @@ import dev.harakki.comics.library.application.LibraryService;
 import dev.harakki.comics.library.domain.LibraryEntry;
 import dev.harakki.comics.library.dto.LibraryEntryResponse;
 import dev.harakki.comics.library.dto.LibraryEntryUpdateRequest;
+import dev.harakki.comics.library.dto.ReadingProgressRequest;
 import lombok.RequiredArgsConstructor;
 import net.kaczmarzyk.spring.data.jpa.domain.Equal;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
@@ -38,7 +39,7 @@ class LibraryController implements LibraryApi {
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/{titleId}")
     public LibraryEntryResponse getLibraryEntry(@PathVariable UUID titleId) {
-        return libraryService.getById(titleId);
+        return libraryService.getByTitleId(titleId);
     }
 
     @PreAuthorize("hasRole('USER')")
@@ -60,11 +61,13 @@ class LibraryController implements LibraryApi {
         libraryService.removeFromLibrary(entryId);
     }
 
-    // TODO эндпоинт Reading Progress POST /api/v1/library/{titleId}/progress (или PATCH /library/entry)
-    // Бэкенд сам должен
-    // Найти или создать запись в библиотеке для этого юзера и тайтла.
-    // Обновить lastReadChapterId.
-    // Автоматически переключить статус на READING (если он был TO_READ).
-    // (Опционально) Вернуть ID следующей главы в ответе.
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/titles/{titleId}/progress")
+    public LibraryEntryResponse recordReadingProgress(
+            @PathVariable UUID titleId,
+            @RequestBody ReadingProgressRequest request
+    ) {
+        return libraryService.recordReadingProgress(titleId, request.chapterId());
+    }
 
 }

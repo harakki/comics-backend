@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -66,6 +65,24 @@ public class UserCollectionController implements UserCollectionApi {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCollection(@PathVariable UUID id) {
         collectionService.delete(id);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/{id}/titles/{titleId}")
+    public UserCollectionResponse addTitle(
+            @PathVariable UUID id,
+            @PathVariable UUID titleId
+    ) {
+        return collectionService.addTitle(id, titleId);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @DeleteMapping("/{id}/titles/{titleId}")
+    public UserCollectionResponse removeTitle(
+            @PathVariable UUID id,
+            @PathVariable UUID titleId
+    ) {
+        return collectionService.removeTitle(id, titleId);
     }
 
 }

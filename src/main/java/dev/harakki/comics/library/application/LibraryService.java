@@ -105,7 +105,6 @@ public class LibraryService {
         log.info("Removed library entry: id={} for user {}", entryId, currentUserId);
     }
 
-    // TODO entry и title IDs создают путаницу, необходимо избавиться от чего-то одного
     public LibraryEntryResponse getById(UUID entryId) {
         UUID currentUserId = getCurrentUserId();
 
@@ -160,6 +159,36 @@ public class LibraryService {
 
         return libraryEntryRepository.findAll(finalSpec, pageable)
                 .map(libraryEntryMapper::toResponse);
+    }
+
+    @Transactional
+    public LibraryEntryResponse recordReadingProgress(UUID titleId, UUID chapterId) {
+        UUID currentUserId = getCurrentUserId();
+
+        var entry = libraryEntryRepository.findByUserIdAndTitleId(currentUserId, titleId)
+                .orElseGet(() -> {
+                    var newEntry = new LibraryEntry();
+                    newEntry.setUserId(currentUserId);
+                    newEntry.setTitleId(titleId);
+                    newEntry.setStatus(ReadingStatus.READING);
+                    return newEntry;
+                });
+
+        if (entry.getStatus() == ReadingStatus.TO_READ) {
+            entry.setStatus(ReadingStatus.READING);
+        }
+        entry.setLastReadChapterId(chapterId);
+
+        try {
+            entry = libraryEntryRepository.save(entry);
+            libraryEntryRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new ResourceAlreadyExistsException("Library entry already exists");
+        }
+
+        log.info("Recorded reading progress: titleId={}, chapterId={}, userId={}", titleId, chapterId, currentUserId);
+
+        return libraryEntryMapper.toResponse(entry);
     }
 
     private UUID getCurrentUserId() {

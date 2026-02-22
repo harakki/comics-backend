@@ -85,12 +85,22 @@ public class ChapterService {
                 ))
                 .toList();
 
+        UUID prevChapterId = chapterRepository.findPrevChapter(chapter.getTitleId(), chapter.getNumber(), chapter.getSubNumber())
+                .map(Chapter::getId)
+                .orElse(null);
+
+        UUID nextChapterId = chapterRepository.findNextChapter(chapter.getTitleId(), chapter.getNumber(), chapter.getSubNumber())
+                .map(Chapter::getId)
+                .orElse(null);
+
         return new ChapterDetailsResponse(
                 chapter.getId(),
                 chapter.getTitleId(),
                 chapter.getDisplayNumber(),
                 chapter.getName(),
-                pages
+                pages,
+                prevChapterId,
+                nextChapterId
         );
     }
 
@@ -183,12 +193,10 @@ public class ChapterService {
         log.debug("Updated chapter: id={} metadata", chapterId);
     }
 
-    // TODO recordChapterRead should return nextUnreadChapter
     @Transactional
-    public void recordChapterRead(UUID chapterId, ChapterReadRequest request) {
-        if (!chapterRepository.existsById(chapterId)) {
-            throw new ResourceNotFoundException("Chapter with id " + chapterId + " not found");
-        }
+    public NextChapterResponse recordChapterRead(UUID chapterId, ChapterReadRequest request) {
+        var chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new ResourceNotFoundException("Chapter with id " + chapterId + " not found"));
 
         var userId = SecurityUtils.getOptionalCurrentUserId().orElse(null);
         var event = new ChapterReadEvent(
@@ -199,6 +207,8 @@ public class ChapterService {
 
         eventPublisher.publishEvent(event);
         log.info("Published chapter read event: chapterId={}, userId={}", chapterId, userId);
+
+        return getNextUnreadChapter(chapter.getTitleId());
     }
 
     public ChapterReadStatusResponse isChapterRead(UUID chapterId) {

@@ -37,7 +37,6 @@ public class AnalyticsEventListener {
         }
     }
 
-    // TODO эндпоинт для лайка
     @Async
     @ApplicationModuleListener
     public void on(TitleLikedEvent event) {
@@ -51,7 +50,6 @@ public class AnalyticsEventListener {
         }
     }
 
-    // TODO эндпоинт для дизлайка
     @Async
     @ApplicationModuleListener
     public void on(TitleDislikedEvent event) {

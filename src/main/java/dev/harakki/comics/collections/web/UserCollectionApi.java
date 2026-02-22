@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +20,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 @Tag(name = "Collections", description = "User collections management")
-// FIXME @SecurityRequirement(name = "bearer-jwt")
+@SecurityRequirement(name = "bearer-jwt")
 public interface UserCollectionApi {
 
     @Operation(
@@ -99,6 +100,38 @@ public interface UserCollectionApi {
     })
     void deleteCollection(
             @Parameter(description = "Collection UUID", required = true) @NotNull UUID id
+    );
+
+    @Operation(
+            operationId = "addTitleToCollection",
+            summary = "Add a title to collection"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Title added to collection",
+                    content = @Content(schema = @Schema(implementation = UserCollectionResponse.class))),
+            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
+            @ApiResponse(responseCode = "403", ref = "Forbidden"),
+            @ApiResponse(responseCode = "404", ref = "NotFound")
+    })
+    UserCollectionResponse addTitle(
+            @Parameter(description = "Collection UUID", required = true) @NotNull UUID id,
+            @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId
+    );
+
+    @Operation(
+            operationId = "removeTitleFromCollection",
+            summary = "Remove a title from collection"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Title removed from collection",
+                    content = @Content(schema = @Schema(implementation = UserCollectionResponse.class))),
+            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
+            @ApiResponse(responseCode = "403", ref = "Forbidden"),
+            @ApiResponse(responseCode = "404", ref = "NotFound")
+    })
+    UserCollectionResponse removeTitle(
+            @Parameter(description = "Collection UUID", required = true) @NotNull UUID id,
+            @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId
     );
 
 }

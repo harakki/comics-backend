@@ -3,11 +3,10 @@ package dev.harakki.comics.analytics.web;
 import dev.harakki.comics.analytics.application.AnalyticsService;
 import dev.harakki.comics.analytics.dto.TitleAnalyticsResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -21,6 +20,20 @@ public class AnalyticsController implements AnalyticsApi {
     @GetMapping("/titles/{titleId}/analytics")
     public TitleAnalyticsResponse getTitleAnalytics(@PathVariable UUID titleId) {
         return analyticsService.getTitleAnalytics(titleId);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/titles/{titleId}/like")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void likeTitle(@PathVariable UUID titleId) {
+        analyticsService.likeTitle(titleId);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/titles/{titleId}/dislike")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void dislikeTitle(@PathVariable UUID titleId) {
+        analyticsService.dislikeTitle(titleId);
     }
 
 }
