@@ -54,4 +54,22 @@ public class ChapterController implements ChapterApi {
         chapterService.delete(chapterId);
     }
 
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/chapters/{chapterId}/read")
+    public NextChapterResponse recordChapterRead(@PathVariable UUID chapterId, @RequestBody ChapterReadRequest request) {
+        return chapterService.recordChapterRead(chapterId, request);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/chapters/{chapterId}/read-status")
+    public ChapterReadStatusResponse isChapterRead(@PathVariable UUID chapterId) {
+        return chapterService.isChapterRead(chapterId);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/titles/{titleId}/next-chapter")
+    public NextChapterResponse getNextUnreadChapter(@PathVariable UUID titleId) {
+        return chapterService.getNextUnreadChapter(titleId);
+    }
+
 }

@@ -18,4 +18,22 @@ public interface ChapterRepository extends JpaRepository<Chapter, UUID> {
     @Query("SELECT c FROM Chapter c LEFT JOIN FETCH c.pages WHERE c.id = :id")
     Optional<Chapter> findByIdWithPages(UUID id);
 
+    // Find previous chapter (largest number/subNumber that is less than current)
+    @Query("""
+            SELECT c FROM Chapter c WHERE c.titleId = :titleId
+            AND (c.number < :number OR (c.number = :number AND c.subNumber < :subNumber))
+            ORDER BY c.number DESC, c.subNumber DESC
+            LIMIT 1
+            """)
+    Optional<Chapter> findPrevChapter(UUID titleId, int number, int subNumber);
+
+    // Find next chapter (smallest number/subNumber that is greater than current)
+    @Query("""
+            SELECT c FROM Chapter c WHERE c.titleId = :titleId
+            AND (c.number > :number OR (c.number = :number AND c.subNumber > :subNumber))
+            ORDER BY c.number ASC, c.subNumber ASC
+            LIMIT 1
+            """)
+    Optional<Chapter> findNextChapter(UUID titleId, int number, int subNumber);
+
 }

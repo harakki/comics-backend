@@ -76,7 +76,7 @@ public class ChapterService {
         var chapter = chapterRepository.findByIdWithPages(chapterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chapter not found"));
 
-        List<PageResponse> pages = chapter.getPages().stream()
+        var pages = chapter.getPages().stream()
                 .map(page -> new PageResponse(
                         page.getId(),
                         page.getMediaId(),
@@ -85,12 +85,22 @@ public class ChapterService {
                 ))
                 .toList();
 
+        var prevChapterId = chapterRepository.findPrevChapter(chapter.getTitleId(), chapter.getNumber(), chapter.getSubNumber())
+                .map(Chapter::getId)
+                .orElse(null);
+
+        var nextChapterId = chapterRepository.findNextChapter(chapter.getTitleId(), chapter.getNumber(), chapter.getSubNumber())
+                .map(Chapter::getId)
+                .orElse(null);
+
         return new ChapterDetailsResponse(
                 chapter.getId(),
                 chapter.getTitleId(),
                 chapter.getDisplayNumber(),
                 chapter.getName(),
-                pages
+                pages,
+                prevChapterId,
+                nextChapterId
         );
     }
 
@@ -183,12 +193,10 @@ public class ChapterService {
         log.debug("Updated chapter: id={} metadata", chapterId);
     }
 
-    // TODO recordChapterRead should return nextUnreadChapter
     @Transactional
-    public void recordChapterRead(UUID chapterId, ChapterReadRequest request) {
-        if (!chapterRepository.existsById(chapterId)) {
-            throw new ResourceNotFoundException("Chapter with id " + chapterId + " not found");
-        }
+    public NextChapterResponse recordChapterRead(UUID chapterId, ChapterReadRequest request) {
+        var chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new ResourceNotFoundException("Chapter with id " + chapterId + " not found"));
 
         var userId = SecurityUtils.getOptionalCurrentUserId().orElse(null);
         var event = new ChapterReadEvent(
@@ -199,6 +207,8 @@ public class ChapterService {
 
         eventPublisher.publishEvent(event);
         log.info("Published chapter read event: chapterId={}, userId={}", chapterId, userId);
+
+        return getNextUnreadChapter(chapter.getTitleId());
     }
 
     public ChapterReadStatusResponse isChapterRead(UUID chapterId) {
