@@ -2,6 +2,7 @@ package dev.harakki.comics.library.web;
 
 import dev.harakki.comics.library.domain.LibraryEntry;
 import dev.harakki.comics.library.dto.LibraryEntryCreateRequest;
+import dev.harakki.comics.library.dto.LibraryEntryReadingProgressRequest;
 import dev.harakki.comics.library.dto.LibraryEntryResponse;
 import dev.harakki.comics.library.dto.LibraryEntryUpdateRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +23,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.UUID;
 
 @Tag(name = "Library", description = "User's personal library management")
-// @SecurityRequirement(name = "bearer-jwt")
+@SecurityRequirement(name = "bearer-jwt")
 public interface LibraryApi {
 
     @Operation(
@@ -44,7 +45,7 @@ public interface LibraryApi {
 
     @Operation(
             operationId = "getLibraryEntry",
-            summary = "Get library entry"
+            summary = "Get library entry by title ID"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Library entry found",
@@ -52,7 +53,7 @@ public interface LibraryApi {
             @ApiResponse(responseCode = "401", ref = "Unauthorized"),
             @ApiResponse(responseCode = "404", ref = "NotFound")
     })
-    LibraryEntryResponse getLibraryEntry(@Parameter(description = "Library entry UUID", required = true) @NotNull UUID entryId);
+    LibraryEntryResponse getLibraryEntry(@Parameter(description = "Title UUID", required = true) @NotNull UUID titleId);
 
     @Operation(
             operationId = "getMyLibrary",
@@ -79,5 +80,21 @@ public interface LibraryApi {
             @ApiResponse(responseCode = "404", ref = "NotFound")
     })
     void deleteLibraryEntry(@Parameter(description = "Library entry UUID", required = true) @NotNull UUID entryId);
+
+    @Operation(
+            operationId = "recordReadingProgress",
+            summary = "Record reading progress for a title"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Reading progress recorded",
+                    content = @Content(schema = @Schema(implementation = LibraryEntryResponse.class))),
+            @ApiResponse(responseCode = "400", ref = "BadRequest"),
+            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
+            @ApiResponse(responseCode = "404", ref = "NotFound")
+    })
+    LibraryEntryResponse recordReadingProgress(
+            @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId,
+            @Valid LibraryEntryReadingProgressRequest request
+    );
 
 }
