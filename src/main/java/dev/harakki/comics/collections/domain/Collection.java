@@ -21,8 +21,7 @@ import java.util.UUID;
 @ToString(onlyExplicitlyIncluded = true)
 @Table(name = "user_collections", indexes = {
         @Index(name = "idx_collection_author", columnList = "authorId"),
-        @Index(name = "idx_collection_author_name", columnList = "authorId, name", unique = true),
-        @Index(name = "idx_collection_share_token", columnList = "shareToken", unique = true)
+        @Index(name = "idx_collection_author_name", columnList = "authorId, name", unique = true)
 })
 @EntityListeners(AuditingEntityListener.class)
 public class Collection {

@@ -19,17 +19,16 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class CollectionService { // TODO доступ к коллекции по ссылке с id, а не по токену
+public class CollectionService {
 
     private final CollectionRepository collectionRepository;
     private final CollectionMapper collectionMapper;
@@ -65,13 +64,15 @@ public class CollectionService { // TODO доступ к коллекции по
     }
 
     public UserCollectionResponse getById(UUID id) {
-        UUID currentUserId = getCurrentUserId();
+        var currentUserId = getOptionalCurrentUserId();
 
         var entity = collectionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Collection not found"));
 
-        if (!entity.getIsPublic() && !entity.getAuthorId().equals(currentUserId)) {
-            throw new AccessDeniedException("Collection is private");
+        if (!entity.getIsPublic()) {
+            if (currentUserId.isEmpty() || !entity.getAuthorId().equals(currentUserId.get())) {
+                throw new AccessDeniedException("Collection is private");
+            }
         }
 
         return collectionMapper.toResponse(entity);
@@ -170,6 +171,10 @@ public class CollectionService { // TODO доступ к коллекции по
 
     private UUID getCurrentUserId() {
         return SecurityUtils.getCurrentUserId();
+    }
+
+    private Optional<UUID> getOptionalCurrentUserId() {
+        return SecurityUtils.getOptionalCurrentUserId();
     }
 
 }

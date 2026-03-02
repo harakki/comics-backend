@@ -25,7 +25,8 @@ public interface UserCollectionApi {
 
     @Operation(
             operationId = "getCollection",
-            summary = "Get collection"
+            summary = "Get collection",
+            security = {}
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Collection retrieved",
