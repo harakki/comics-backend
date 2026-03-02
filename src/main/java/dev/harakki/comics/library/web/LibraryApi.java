@@ -1,8 +1,6 @@
 package dev.harakki.comics.library.web;
 
 import dev.harakki.comics.library.domain.LibraryEntry;
-import dev.harakki.comics.library.dto.LibraryEntryCreateRequest;
-import dev.harakki.comics.library.dto.LibraryEntryReadingProgressRequest;
 import dev.harakki.comics.library.dto.LibraryEntryResponse;
 import dev.harakki.comics.library.dto.LibraryEntryUpdateRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,8 +58,7 @@ public interface LibraryApi {
             summary = "Get my library"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Library entries retrieved",
-                    content = @Content(schema = @Schema(implementation = LibraryEntryResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Library entries retrieved"),
             @ApiResponse(responseCode = "401", ref = "Unauthorized")
     })
     Page<LibraryEntryResponse> getMyLibrary(
@@ -80,21 +77,5 @@ public interface LibraryApi {
             @ApiResponse(responseCode = "404", ref = "NotFound")
     })
     void deleteLibraryEntry(@Parameter(description = "Library entry UUID", required = true) @NotNull UUID entryId);
-
-    @Operation(
-            operationId = "recordReadingProgress",
-            summary = "Record reading progress for a title"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Reading progress recorded",
-                    content = @Content(schema = @Schema(implementation = LibraryEntryResponse.class))),
-            @ApiResponse(responseCode = "400", ref = "BadRequest"),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
-    LibraryEntryResponse recordReadingProgress(
-            @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId,
-            @Valid LibraryEntryReadingProgressRequest request
-    );
 
 }

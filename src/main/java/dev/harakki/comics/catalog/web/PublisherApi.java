@@ -49,8 +49,7 @@ public interface PublisherApi {
             @Parameter(name = "country", description = "Filter by Country ISO Code", example = "JP")
     })
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Page of publishers",
-                    content = @Content(schema = @Schema(implementation = PublisherResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Page of publishers"),
             @ApiResponse(responseCode = "400", ref = "BadRequest")
     })
     Page<PublisherResponse> getPublishers(

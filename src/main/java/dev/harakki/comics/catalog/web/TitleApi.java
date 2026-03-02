@@ -42,8 +42,7 @@ public interface TitleApi {
             summary = "Search and filter titles"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Page of titles",
-                    content = @Content(schema = @Schema(implementation = TitleResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Page of titles"),
             @ApiResponse(responseCode = "400", ref = "BadRequest")
     })
     @Parameters({

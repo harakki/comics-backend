@@ -42,8 +42,7 @@ public interface AuthorApi {
             summary = "Search and filter authors"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Page of authors",
-                    content = @Content(schema = @Schema(implementation = AuthorResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Page of authors"),
             @ApiResponse(responseCode = "400", ref = "BadRequest")
     })
     @Parameters({
@@ -75,8 +74,7 @@ public interface AuthorApi {
             summary = "Update author"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Author updated",
-                    content = @Content(schema = @Schema(implementation = AuthorResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Author updated"),
             @ApiResponse(responseCode = "400", ref = "BadRequest"),
             @ApiResponse(responseCode = "401", ref = "Unauthorized"),
             @ApiResponse(responseCode = "403", ref = "Forbidden"),

@@ -161,36 +161,6 @@ public class LibraryService {
                 .map(libraryEntryMapper::toResponse);
     }
 
-    @Transactional
-    public LibraryEntryResponse recordReadingProgress(UUID titleId, UUID chapterId) {
-        UUID currentUserId = getCurrentUserId();
-
-        var entry = libraryEntryRepository.findByUserIdAndTitleId(currentUserId, titleId)
-                .orElseGet(() -> {
-                    var newEntry = new LibraryEntry();
-                    newEntry.setUserId(currentUserId);
-                    newEntry.setTitleId(titleId);
-                    newEntry.setStatus(ReadingStatus.READING);
-                    return newEntry;
-                });
-
-        if (entry.getStatus() == ReadingStatus.TO_READ) {
-            entry.setStatus(ReadingStatus.READING);
-        }
-        entry.setLastReadChapterId(chapterId);
-
-        try {
-            entry = libraryEntryRepository.save(entry);
-            libraryEntryRepository.flush();
-        } catch (DataIntegrityViolationException e) {
-            throw new ResourceAlreadyExistsException("Library entry already exists");
-        }
-
-        log.info("Recorded reading progress: titleId={}, chapterId={}, userId={}", titleId, chapterId, currentUserId);
-
-        return libraryEntryMapper.toResponse(entry);
-    }
-
     private UUID getCurrentUserId() {
         return SecurityUtils.getCurrentUserId();
     }

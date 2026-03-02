@@ -39,8 +39,7 @@ public interface TagApi {
             summary = "Get all tags"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Page of tags",
-                    content = @Content(schema = @Schema(implementation = TagResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Page of tags"),
             @ApiResponse(responseCode = "400", ref = "BadRequest")
     })
     Page<TagResponse> getTags(@ParameterObject Pageable pageable);

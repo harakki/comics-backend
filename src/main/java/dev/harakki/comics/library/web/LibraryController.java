@@ -2,7 +2,6 @@ package dev.harakki.comics.library.web;
 
 import dev.harakki.comics.library.application.LibraryService;
 import dev.harakki.comics.library.domain.LibraryEntry;
-import dev.harakki.comics.library.dto.LibraryEntryReadingProgressRequest;
 import dev.harakki.comics.library.dto.LibraryEntryResponse;
 import dev.harakki.comics.library.dto.LibraryEntryUpdateRequest;
 import lombok.RequiredArgsConstructor;
@@ -59,13 +58,6 @@ class LibraryController implements LibraryApi {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteLibraryEntry(@PathVariable UUID entryId) {
         libraryService.removeFromLibrary(entryId);
-    }
-
-    @PreAuthorize("hasRole('USER')")
-    @PostMapping("/titles/{titleId}/progress")
-    public LibraryEntryResponse recordReadingProgress(@PathVariable UUID titleId,
-                                                      @RequestBody LibraryEntryReadingProgressRequest request) {
-        return libraryService.recordReadingProgress(titleId, request.chapterId());
     }
 
 }
