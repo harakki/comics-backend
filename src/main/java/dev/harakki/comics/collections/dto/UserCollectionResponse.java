@@ -14,7 +14,6 @@ public record UserCollectionResponse(
         String name,
         String description,
         Boolean isPublic,
-        String shareToken,
         List<UUID> titleIds,
         Instant createdAt,
         Instant updatedAt
