@@ -1,7 +1,5 @@
 package dev.harakki.comics.analytics.application;
 
-import dev.harakki.comics.analytics.api.TitleDislikedEvent;
-import dev.harakki.comics.analytics.api.TitleLikedEvent;
 import dev.harakki.comics.analytics.domain.InteractionType;
 import dev.harakki.comics.analytics.domain.UserInteraction;
 import dev.harakki.comics.analytics.dto.TitleAnalyticsResponse;
@@ -14,6 +12,7 @@ import dev.harakki.comics.content.api.ChapterReadEvent;
 import dev.harakki.comics.content.api.ChapterUpdatedEvent;
 import dev.harakki.comics.library.api.LibraryAddTitleEvent;
 import dev.harakki.comics.library.api.LibraryRemoveTitleEvent;
+import dev.harakki.comics.library.api.LibraryVoteTitleEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -65,21 +64,14 @@ public class AnalyticsService {
     }
 
     @Transactional
-    public void recordTitleLike(TitleLikedEvent event) {
+    public void recordTitleVote(LibraryVoteTitleEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
-                .type(InteractionType.TITLE_LIKED)
+                .type(InteractionType.TITLE_VOTED)
                 .targetId(event.titleId())
-                .build();
-        userInteractionRepository.save(interaction);
-    }
-
-    @Transactional
-    public void recordTitleDislike(TitleDislikedEvent event) {
-        var interaction = UserInteraction.builder()
-                .userId(event.userId())
-                .type(InteractionType.TITLE_DISLIKED)
-                .targetId(event.titleId())
+                .metadata(Map.of(
+                        "voteType", event.vote()
+                ))
                 .build();
         userInteractionRepository.save(interaction);
     }

@@ -1,7 +1,5 @@
 package dev.harakki.comics.analytics.application;
 
-import dev.harakki.comics.analytics.api.TitleDislikedEvent;
-import dev.harakki.comics.analytics.api.TitleLikedEvent;
 import dev.harakki.comics.catalog.api.*;
 import dev.harakki.comics.collections.api.*;
 import dev.harakki.comics.content.api.ChapterCreatedEvent;
@@ -10,6 +8,7 @@ import dev.harakki.comics.content.api.ChapterReadEvent;
 import dev.harakki.comics.content.api.ChapterUpdatedEvent;
 import dev.harakki.comics.library.api.LibraryAddTitleEvent;
 import dev.harakki.comics.library.api.LibraryRemoveTitleEvent;
+import dev.harakki.comics.library.api.LibraryVoteTitleEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.modulith.events.ApplicationModuleListener;
@@ -37,31 +36,16 @@ public class AnalyticsEventListener {
         }
     }
 
-    // TODO эндпоинт для лайка
     @Async
     @ApplicationModuleListener
-    public void on(TitleLikedEvent event) {
-        log.debug("Processing title liked event: titleId={}, userId={}", event.titleId(), event.userId());
+    public void on(LibraryVoteTitleEvent event) {
+        log.debug("Processing title vote event: titleId={}, userId={}, vote={}", event.titleId(), event.userId(), event.vote());
 
         try {
-            analyticsService.recordTitleLike(event);
-            log.info("Title liked event processed successfully: titleId={}, userId={}", event.titleId(), event.userId());
+            analyticsService.recordTitleVote(event);
+            log.info("Title vote event processed successfully: titleId={}, userId={}, vote={}", event.titleId(), event.userId(), event.vote());
         } catch (Exception e) {
-            log.error("Failed to process title liked event: titleId={}, userId={}", event.titleId(), event.userId(), e);
-        }
-    }
-
-    // TODO эндпоинт для дизлайка
-    @Async
-    @ApplicationModuleListener
-    public void on(TitleDislikedEvent event) {
-        log.debug("Processing title disliked event: titleId={}, userId={}", event.titleId(), event.userId());
-
-        try {
-            analyticsService.recordTitleDislike(event);
-            log.info("Title disliked event processed successfully: titleId={}, userId={}", event.titleId(), event.userId());
-        } catch (Exception e) {
-            log.error("Failed to process title disliked event: titleId={}, userId={}", event.titleId(), event.userId(), e);
+            log.error("Failed to process title vote event: titleId={}, userId={}, vote={}", event.titleId(), event.userId(), event.vote(), e);
         }
     }
 
