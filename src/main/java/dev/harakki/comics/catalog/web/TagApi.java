@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -30,7 +32,7 @@ public interface TagApi {
                     content = @Content(schema = @Schema(implementation = TagResponse.class))),
             @ApiResponse(responseCode = "404", ref = "NotFound")
     })
-    public TagResponse getTag(@Parameter(description = "Tag UUID", required = true) @NotNull UUID id);
+    TagResponse getTag(@Parameter(description = "Tag UUID", required = true) @NotNull UUID id);
 
     @Operation(
             operationId = "getTags",
@@ -41,8 +43,9 @@ public interface TagApi {
                     content = @Content(schema = @Schema(implementation = TagResponse.class))),
             @ApiResponse(responseCode = "400", ref = "BadRequest")
     })
-    public Page<TagResponse> getTags(@ParameterObject Pageable pageable);
+    Page<TagResponse> getTags(@ParameterObject Pageable pageable);
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "createTag",
             summary = "Create tag"
@@ -55,8 +58,9 @@ public interface TagApi {
             @ApiResponse(responseCode = "403", ref = "Forbidden"),
             @ApiResponse(responseCode = "409", ref = "Conflict")
     })
-    public TagResponse createTag(@Valid TagCreateRequest request);
+    TagResponse createTag(@Valid TagCreateRequest request);
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "updateTag",
             summary = "Update tag"
@@ -69,9 +73,10 @@ public interface TagApi {
             @ApiResponse(responseCode = "403", ref = "Forbidden"),
             @ApiResponse(responseCode = "404", ref = "NotFound")
     })
-    public TagResponse updateTag(@Parameter(description = "Tag UUID", required = true) @NotNull UUID id,
+    TagResponse updateTag(@Parameter(description = "Tag UUID", required = true) @NotNull UUID id,
                                  @Valid TagUpdateRequest request);
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "deleteTag",
             summary = "Delete tag"
@@ -82,6 +87,6 @@ public interface TagApi {
             @ApiResponse(responseCode = "403", ref = "Forbidden"),
             @ApiResponse(responseCode = "404", ref = "NotFound")
     })
-    public void deleteTag(@Parameter(description = "Tag UUID", required = true) @NotNull UUID id);
+    void deleteTag(@Parameter(description = "Tag UUID", required = true) @NotNull UUID id);
 
 }

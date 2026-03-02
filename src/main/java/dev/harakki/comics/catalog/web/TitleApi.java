@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -61,6 +63,7 @@ public interface TitleApi {
             @ParameterObject Pageable pageable
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "createTitle",
             summary = "Create title"
@@ -75,6 +78,7 @@ public interface TitleApi {
     })
     TitleResponse createTitle(@Valid TitleCreateRequest request);
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "updateTitle",
             summary = "Update title"
@@ -92,6 +96,7 @@ public interface TitleApi {
             @Valid TitleUpdateRequest request
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "deleteTitle",
             summary = "Delete title"

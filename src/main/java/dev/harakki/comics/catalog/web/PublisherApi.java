@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -57,6 +59,7 @@ public interface PublisherApi {
             @ParameterObject Pageable pageable
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "createPublisher",
             summary = "Create publisher"
@@ -71,6 +74,7 @@ public interface PublisherApi {
     })
     PublisherResponse createPublisher(PublisherCreateRequest request);
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "updatePublisher",
             summary = "Update publisher"
@@ -86,6 +90,7 @@ public interface PublisherApi {
     PublisherResponse updatePublisher(
             @Parameter(description = "Publisher UUID", required = true) @NotNull UUID id, @Valid PublisherUpdateRequest request);
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "deletePublisher",
             summary = "Delete publisher"

@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -52,6 +54,7 @@ public interface AuthorApi {
                                     @Parameter(hidden = true) Specification<Author> filterSpec,
                                     @ParameterObject Pageable pageable);
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "createAuthor",
             summary = "Create author"
@@ -66,6 +69,7 @@ public interface AuthorApi {
     })
     AuthorResponse createAuthor(@Valid AuthorCreateRequest request);
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "updateAuthor",
             summary = "Update author"
@@ -81,6 +85,7 @@ public interface AuthorApi {
     AuthorResponse updateAuthor(@Parameter(description = "Author UUID", required = true) @NotNull UUID id,
                                 @Valid AuthorUpdateRequest request);
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "deleteAuthor",
             summary = "Delete author"

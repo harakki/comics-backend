@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -45,6 +46,7 @@ public interface ChapterApi {
             @Parameter(description = "Chapter UUID", required = true) @NotNull UUID chapterId
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "createChapter",
             summary = "Create chapter"
@@ -61,6 +63,7 @@ public interface ChapterApi {
             @Valid ChapterCreateRequest request
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "updateChapter",
             summary = "Update chapter"
@@ -77,6 +80,7 @@ public interface ChapterApi {
             @Valid ChapterUpdateRequest request
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "deleteChapter",
             summary = "Delete chapter"
@@ -91,6 +95,7 @@ public interface ChapterApi {
             @Parameter(description = "Chapter UUID", required = true) @NotNull UUID chapterId
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "recordChapterRead",
             summary = "Record chapter as read and get next unread chapter"
@@ -107,6 +112,7 @@ public interface ChapterApi {
             @Valid ChapterReadRequest request
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "isChapterRead",
             summary = "Check if chapter has been read by current user"
@@ -122,6 +128,7 @@ public interface ChapterApi {
             @Parameter(description = "Chapter UUID", required = true) @NotNull UUID chapterId
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "getNextUnreadChapter",
             summary = "Get next unread chapter for a title"

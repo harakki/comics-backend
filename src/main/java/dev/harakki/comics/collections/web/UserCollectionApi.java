@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -20,13 +21,15 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 @Tag(name = "Collections", description = "User collections management")
-@SecurityRequirement(name = "bearer-jwt")
 public interface UserCollectionApi {
 
+    @SecurityRequirements({
+            @SecurityRequirement(name = "bearer-jwt"),
+            @SecurityRequirement(name = "")
+    })
     @Operation(
             operationId = "getCollection",
-            summary = "Get collection",
-            security = {}
+            summary = "Get collection"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Collection retrieved",
@@ -46,6 +49,7 @@ public interface UserCollectionApi {
             @ParameterObject Pageable pageable
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "getMyCollections",
             summary = "Get my collections"
@@ -60,6 +64,7 @@ public interface UserCollectionApi {
             @ParameterObject Pageable pageable
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "createCollection",
             summary = "Create collection"
@@ -72,6 +77,7 @@ public interface UserCollectionApi {
     })
     UserCollectionResponse createCollection(@Valid CollectionCreateRequest request);
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "updateCollection",
             summary = "Update collection"
@@ -89,6 +95,7 @@ public interface UserCollectionApi {
             @Valid CollectionUpdateRequest request
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "deleteCollection",
             summary = "Delete collection"
@@ -103,6 +110,7 @@ public interface UserCollectionApi {
             @Parameter(description = "Collection UUID", required = true) @NotNull UUID id
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "addTitleToCollection",
             summary = "Add a title to collection"
@@ -119,6 +127,7 @@ public interface UserCollectionApi {
             @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId
     );
 
+    @SecurityRequirement(name = "bearer-jwt")
     @Operation(
             operationId = "removeTitleFromCollection",
             summary = "Remove a title from collection"

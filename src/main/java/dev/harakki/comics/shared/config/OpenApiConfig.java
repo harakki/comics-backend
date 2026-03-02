@@ -35,8 +35,7 @@ public class OpenApiConfig {
                         .schemas(Map.of(
                                 "ProblemDetail", problemDetailSchema()
                         ))
-                )
-                .addSecurityItem(new SecurityRequirement().addList("bearer-jwt"));
+                );
     }
 
     private Info apiInfo() {
