@@ -139,24 +139,19 @@ public class CollectionService { // TODO доступ к коллекции по
         log.info("Deleted collection: id={} by user {}", id, currentUserId);
     }
 
-    // TODO переделать в addTitle(...)
-    public UserCollectionResponse addTitles(UUID id, List<UUID> titleIds) {
+    public UserCollectionResponse addTitle(UUID id, UUID titleId) {
         var currentUserId = getCurrentUserId();
         var existing = getById(id);
         List<UUID> combined = new ArrayList<>(existing.titleIds());
 
-        // Find new titles being added
-        List<UUID> newTitles = titleIds.stream()
-                .filter(titleId -> !combined.contains(titleId))
-                .toList();
+        if (combined.contains(titleId)) {
+            return existing;
+        }
 
-        combined.addAll(titleIds);
-        var update = new CollectionUpdateRequest(null, null, null, combined);
-        var result = update(id, update);
-
-        newTitles.forEach(titleId ->
-                eventPublisher.publishEvent(new CollectionTitleAddedEvent(id, titleId, currentUserId))
-        );
+        combined.add(titleId);
+        var updateRequest = new CollectionUpdateRequest(null, null, null, combined);
+        var result = update(id, updateRequest);
+        eventPublisher.publishEvent(new CollectionTitleAddedEvent(id, titleId, currentUserId));
 
         return result;
     }
