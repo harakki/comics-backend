@@ -28,7 +28,7 @@ services:
   #   environment:
   #     - IMGPROXY_KEY=... # ключи безопасности
   #     - IMGPROXY_SALT=...
-  #     # Этим ты говоришь, что картинки брать из MinIO (S3)
+  #     # Картинки брать из MinIO (S3)
   #     - IMGPROXY_USE_S3=true
   #     - IMGPROXY_S3_ENDPOINT=http://minio:9000
   #   ports:
@@ -46,12 +46,13 @@ services:
       - 'KC_DB=postgres'
       - 'KC_DB_USERNAME=myuser'
       - 'KC_DB_PASSWORD=secret'
-    command: start-dev
+    command: start-dev --import-realm
     ports:
       - '8081:8081'
     depends_on:
       - postgres
     volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
       - keycloak_data:/opt/keycloak/data
 
 volumes:
