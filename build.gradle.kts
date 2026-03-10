@@ -1,8 +1,9 @@
 plugins {
     id("java")
+    id("idea")
     id("org.springframework.boot") version "4.0.2"
     id("io.spring.dependency-management") version "1.1.7"
-    id("idea")
+    id("com.google.cloud.tools.jib") version "3.5.3"
 }
 
 group = "dev.harakki"
@@ -101,5 +102,18 @@ idea {
     module {
         isDownloadJavadoc = true
         isDownloadSources = true
+    }
+}
+
+jib {
+    from {
+        image = "eclipse-temurin:25-jre-alpine"
+    }
+    to {
+        image = "uni-diploma-backend"
+        tags = setOf("latest")
+    }
+    container {
+        ports = listOf("8080")
     }
 }
