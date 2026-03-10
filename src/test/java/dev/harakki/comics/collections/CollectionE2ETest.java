@@ -1,10 +1,10 @@
 package dev.harakki.comics.collections;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.harakki.comics.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 import java.util.UUID;
@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CollectionE2ETest extends BaseIntegrationTest {
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private String createCollectionAndGetId(String name) throws Exception {
         var request = Map.of("name", name, "isPublic", true);
@@ -23,11 +23,11 @@ class CollectionE2ETest extends BaseIntegrationTest {
         var result = mockMvc.perform(post("/api/v1/collections")
                         .with(userJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        var body = objectMapper.readTree(result.getResponse().getContentAsString());
+        var body = jsonMapper.readTree(result.getResponse().getContentAsString());
         return body.get("id").asText();
     }
 
@@ -39,7 +39,7 @@ class CollectionE2ETest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/collections")
                         .with(userJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value(uniqueName))
@@ -75,7 +75,7 @@ class CollectionE2ETest extends BaseIntegrationTest {
         mockMvc.perform(patch("/api/v1/collections/{id}", id)
                         .with(userJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
+                        .content(jsonMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.name").value(updatedName));
@@ -97,7 +97,7 @@ class CollectionE2ETest extends BaseIntegrationTest {
 
         mockMvc.perform(post("/api/v1/collections")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().is4xxClientError());
     }
 }

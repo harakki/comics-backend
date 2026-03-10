@@ -1,10 +1,10 @@
 package dev.harakki.comics.library;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.harakki.comics.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 import java.util.UUID;
@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class LibraryE2ETest extends BaseIntegrationTest {
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @Test
     void addToLibrary_asUser_returnsOk() throws Exception {
@@ -25,7 +25,7 @@ class LibraryE2ETest extends BaseIntegrationTest {
         mockMvc.perform(put("/api/v1/library/titles/{titleId}", titleId)
                         .with(userJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.titleId").value(titleId.toString()))
@@ -40,7 +40,7 @@ class LibraryE2ETest extends BaseIntegrationTest {
         mockMvc.perform(put("/api/v1/library/titles/{titleId}", titleId)
                         .with(userJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/v1/library")
@@ -57,7 +57,7 @@ class LibraryE2ETest extends BaseIntegrationTest {
         mockMvc.perform(put("/api/v1/library/titles/{titleId}", titleId)
                         .with(userJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/v1/library/{titleId}", titleId)
@@ -74,11 +74,11 @@ class LibraryE2ETest extends BaseIntegrationTest {
         var result = mockMvc.perform(put("/api/v1/library/titles/{titleId}", titleId)
                         .with(userJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        var body = objectMapper.readTree(result.getResponse().getContentAsString());
+        var body = jsonMapper.readTree(result.getResponse().getContentAsString());
         String entryId = body.get("id").asText();
 
         mockMvc.perform(delete("/api/v1/library/{entryId}", entryId)
@@ -93,7 +93,7 @@ class LibraryE2ETest extends BaseIntegrationTest {
 
         mockMvc.perform(put("/api/v1/library/titles/{titleId}", titleId)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().is4xxClientError());
     }
 }

@@ -1,10 +1,10 @@
 package dev.harakki.comics.content;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.harakki.comics.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ChapterE2ETest extends BaseIntegrationTest {
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private String createTitleAndGetId() throws Exception {
         String uniqueName = "Chapter Title " + UUID.randomUUID().toString().substring(0, 8);
@@ -31,11 +31,11 @@ class ChapterE2ETest extends BaseIntegrationTest {
         var result = mockMvc.perform(post("/api/v1/titles")
                         .with(adminJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        var body = objectMapper.readTree(result.getResponse().getContentAsString());
+        var body = jsonMapper.readTree(result.getResponse().getContentAsString());
         return body.get("id").asText();
     }
 
@@ -49,14 +49,14 @@ class ChapterE2ETest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/titles/{titleId}/chapters", titleId)
                         .with(adminJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
 
         var chapters = mockMvc.perform(get("/api/v1/titles/{titleId}/chapters", titleId))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        var body = objectMapper.readTree(chapters.getResponse().getContentAsString());
+        var body = jsonMapper.readTree(chapters.getResponse().getContentAsString());
         return body.get(0).get("id").asText();
     }
 
@@ -72,7 +72,7 @@ class ChapterE2ETest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/titles/{titleId}/chapters", titleId)
                         .with(adminJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
     }
 
@@ -88,7 +88,7 @@ class ChapterE2ETest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/titles/{titleId}/chapters", titleId)
                         .with(adminJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(get("/api/v1/titles/{titleId}/chapters", titleId))
@@ -97,6 +97,7 @@ class ChapterE2ETest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$[0].id").exists());
     }
 
+    // FIXME тест не проходит
     @Test
     void getChapterDetails_returnsOk() throws Exception {
         String titleId = createTitleAndGetId();
@@ -118,7 +119,7 @@ class ChapterE2ETest extends BaseIntegrationTest {
         mockMvc.perform(patch("/api/v1/chapters/{chapterId}", chapterId)
                         .with(adminJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
+                        .content(jsonMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk());
     }
 
