@@ -1,17 +1,17 @@
 [versions]
-aws-sdk = "2.41.17"
+aws-sdk = "2.42.10"
 mapstruct = "1.6.3"
 lombok-mapstruct-binding = "0.2.0"
-hibernate-jpamodelgen = "7.2.2.Final"
+hibernate-jpamodelgen = "7.2.6.Final"
 specification-arg-resolver = "4.0.0"
-spring-modulith = "2.0.2"
+spring-modulith = "2.0.3"
 uuid-creator = "6.1.1"
 slugify = "3.0.7"
 icu4j = "78.2"
 mockito-core = "5.+"
 testcontainers-minio = "2.0.3"
 testcontainers-keycloak = "4.1.1"
-springdoc-openapi-starter = "3.0.1"
+springdoc-openapi-starter = "3.0.2"
 
 [libraries]
 # AWS SDK for S3
