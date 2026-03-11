@@ -194,4 +194,5 @@ class TagServiceTest {
                 .isInstanceOf(ResourceInUseException.class)
                 .hasMessageContaining(id.toString());
     }
+
 }

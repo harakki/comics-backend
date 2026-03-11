@@ -24,7 +24,9 @@ public abstract class BaseIntegrationTest {
     protected static final UUID ADMIN_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
     protected static final UUID REGULAR_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000002");
     protected static final UUID OTHER_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000003");
+
     protected MockMvc mockMvc;
+
     @Autowired
     private WebApplicationContext wac;
 
@@ -62,4 +64,5 @@ public abstract class BaseIntegrationTest {
                         .claim("realm_access", Map.of("roles", List.of("USER"))))
                 .authorities(new SimpleGrantedAuthority("ROLE_USER"));
     }
+
 }

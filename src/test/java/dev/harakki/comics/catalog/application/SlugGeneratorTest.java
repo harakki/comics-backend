@@ -80,4 +80,5 @@ class SlugGeneratorTest {
         assertThat(result).isEqualTo("test-name-6");
         verify(slugSequenceRepository, atLeast(2)).findBySlugPrefixWithLock("test-name");
     }
+
 }

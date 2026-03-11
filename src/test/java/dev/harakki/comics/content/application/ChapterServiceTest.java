@@ -273,4 +273,5 @@ class ChapterServiceTest {
         assertThat(captor.getValue().chapterId()).isEqualTo(chapterId);
         assertThat(captor.getValue().readTimeMillis()).isEqualTo(5000L);
     }
+
 }

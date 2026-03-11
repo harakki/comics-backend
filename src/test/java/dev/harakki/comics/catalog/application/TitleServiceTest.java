@@ -311,4 +311,5 @@ class TitleServiceTest {
         assertThat(captor.getValue().titleId()).isEqualTo(id);
         assertThat(captor.getValue().userId()).isEqualTo(userId);
     }
+
 }

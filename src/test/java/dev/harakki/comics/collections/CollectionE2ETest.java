@@ -101,4 +101,5 @@ class CollectionE2ETest extends BaseIntegrationTest {
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().is4xxClientError());
     }
+
 }

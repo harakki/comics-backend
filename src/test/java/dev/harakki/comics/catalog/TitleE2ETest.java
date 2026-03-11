@@ -120,4 +120,5 @@ class TitleE2ETest extends BaseIntegrationTest {
                         .with(adminJwt()))
                 .andExpect(status().isNoContent());
     }
+
 }

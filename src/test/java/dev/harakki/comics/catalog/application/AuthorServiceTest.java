@@ -240,4 +240,5 @@ class AuthorServiceTest {
                 .isInstanceOf(ResourceInUseException.class)
                 .hasMessageContaining(id.toString());
     }
+
 }

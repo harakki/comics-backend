@@ -102,4 +102,5 @@ class TagE2ETest extends BaseIntegrationTest {
                         .with(adminJwt()))
                 .andExpect(status().isNoContent());
     }
+
 }

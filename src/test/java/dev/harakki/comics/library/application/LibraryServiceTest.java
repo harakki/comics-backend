@@ -224,4 +224,5 @@ class LibraryServiceTest {
         assertThatThrownBy(() -> libraryService.getById(entryId))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
+
 }

@@ -79,4 +79,5 @@ class ChapterReadHistoryServiceTest {
                 .containsExactlyInAnyOrder(ch1, ch3)
                 .doesNotContain(ch2);
     }
+
 }

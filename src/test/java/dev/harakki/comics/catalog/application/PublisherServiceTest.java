@@ -240,4 +240,5 @@ class PublisherServiceTest {
                 .isInstanceOf(ResourceInUseException.class)
                 .hasMessageContaining(id.toString());
     }
+
 }

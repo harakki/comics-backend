@@ -101,4 +101,5 @@ class AuthorE2ETest extends BaseIntegrationTest {
                         .with(adminJwt()))
                 .andExpect(status().isNoContent());
     }
+
 }

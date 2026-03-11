@@ -223,4 +223,5 @@ class CollectionServiceTest {
 
         verify(collectionRepository, never()).delete(any());
     }
+
 }

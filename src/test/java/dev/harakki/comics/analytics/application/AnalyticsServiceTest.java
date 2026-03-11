@@ -129,4 +129,5 @@ class AnalyticsServiceTest {
         assertThat(captor.getValue().getType()).isEqualTo(InteractionType.TITLE_ADDED_TO_LIBRARY);
         assertThat(captor.getValue().getTargetId()).isEqualTo(titleId);
     }
+
 }
