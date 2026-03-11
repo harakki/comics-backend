@@ -2,7 +2,6 @@ package dev.harakki.comics.analytics.application;
 
 import dev.harakki.comics.analytics.domain.InteractionType;
 import dev.harakki.comics.analytics.domain.UserInteraction;
-import dev.harakki.comics.analytics.dto.TitleAnalyticsResponse;
 import dev.harakki.comics.analytics.infrastructure.UserInteractionRepository;
 import dev.harakki.comics.catalog.api.TitleViewedEvent;
 import dev.harakki.comics.content.api.ChapterReadEvent;
@@ -20,7 +19,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AnalyticsServiceTest {
@@ -57,7 +57,7 @@ class AnalyticsServiceTest {
 
         assertThat(result.titleId()).isEqualTo(titleId);
         assertThat(result.averageRating()).isNull();
-        assertThat(result.totalViews()).isEqualTo(0L);
+        assertThat(result.totalViews()).isZero();
     }
 
     @Test

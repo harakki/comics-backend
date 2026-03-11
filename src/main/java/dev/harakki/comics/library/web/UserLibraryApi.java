@@ -6,9 +6,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
 import org.springdoc.core.annotations.ParameterObject;
@@ -24,12 +21,10 @@ public interface UserLibraryApi {
             operationId = "getUserLibrary",
             summary = "Get user's public library"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Library entries retrieved",
-                    content = @Content(schema = @Schema(implementation = LibraryEntryResponse.class))),
-            @ApiResponse(responseCode = "403", ref = "Forbidden"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Library entries retrieved",
+            content = @Content(schema = @Schema(implementation = LibraryEntryResponse.class)))
+    @ApiResponse(responseCode = "403", ref = "Forbidden")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     Page<LibraryEntryResponse> getUserLibrary(
             @Parameter(description = "User UUID", required = true) @NotNull UUID userId,
             @ParameterObject Pageable pageable

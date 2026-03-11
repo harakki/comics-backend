@@ -13,9 +13,12 @@ import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.net.URI;
+import java.util.logging.Logger;
 
 @Configuration
 class S3Config {
+
+    Logger logger = Logger.getLogger(getClass().getName());
 
     @Value("${s3.region}")
     private String region;
@@ -63,9 +66,9 @@ class S3Config {
         return _ -> {
             try {
                 s3Client.headBucket(b -> b.bucket(bucket));
-            } catch (NoSuchBucketException e) {
+            } catch (NoSuchBucketException _) {
                 s3Client.createBucket(b -> b.bucket(bucket));
-                System.out.println("Bucket '" + bucket + "' created.");
+                logger.info("Bucket '" + bucket + "' created.");
             }
         };
     }

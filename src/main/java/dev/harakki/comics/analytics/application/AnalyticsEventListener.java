@@ -31,7 +31,7 @@ public class AnalyticsEventListener {
         try {
             analyticsService.recordChapterRead(event);
             log.info("Chapter read event processed successfully: userId={}, chapterId={}", event.userId(), event.chapterId());
-        } catch (Exception e) {
+        } catch (Exception _) {
             log.error("Failed to process chapter read event: userId={}, chapterId={}", event.userId(), event.chapterId());
         }
     }

@@ -9,11 +9,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ChapterReadHistoryServiceTest {
@@ -75,7 +75,8 @@ class ChapterReadHistoryServiceTest {
 
         var result = chapterReadHistoryService.getReadChapterIds(userId, allChapterIds);
 
-        assertThat(result).containsExactlyInAnyOrder(ch1, ch3);
-        assertThat(result).doesNotContain(ch2);
+        assertThat(result)
+                .containsExactlyInAnyOrder(ch1, ch3)
+                .doesNotContain(ch2);
     }
 }

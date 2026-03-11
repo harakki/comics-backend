@@ -13,8 +13,6 @@ public interface AuthorMapper {
 
     AuthorResponse toResponse(Author author);
 
-    //AuthorResponseDto toDto(Author author);
-
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Author partialUpdate(AuthorUpdateRequest dto, @MappingTarget Author author);
 

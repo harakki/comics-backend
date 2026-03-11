@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,7 +31,7 @@ class SlugGeneratorTest {
 
     @Test
     void generate_whenSlugIsUnique_returnsBaseSlug() {
-        Function<String, Boolean> existenceCheck = slug -> false;
+        Predicate<String> existenceCheck = slug -> false;
 
         when(slugify.slugify("Test Name")).thenReturn("test-name");
 
@@ -44,7 +44,7 @@ class SlugGeneratorTest {
     @Test
     void generate_whenBaseSlugExists_returnsSuffixedSlug() {
         // First call (base slug) returns true (exists), second call (suffixed) returns false
-        Function<String, Boolean> existenceCheck = slug -> slug.equals("test-name");
+        Predicate<String> existenceCheck = slug -> slug.equals("test-name");
 
         when(slugify.slugify("Test Name")).thenReturn("test-name");
         when(slugSequenceRepository.findBySlugPrefixWithLock("test-name")).thenReturn(Optional.empty());
@@ -61,7 +61,7 @@ class SlugGeneratorTest {
     void generate_whenSequenceExists_incrementsCounter() {
         // Base slug exists, first suffixed slug also exists, second doesn't
         var callCount = new int[]{0};
-        Function<String, Boolean> existenceCheck = slug -> {
+        Predicate<String> existenceCheck = slug -> {
             callCount[0]++;
             // base slug and "test-name-5" exist; "test-name-6" is free
             return slug.equals("test-name") || slug.equals("test-name-5");

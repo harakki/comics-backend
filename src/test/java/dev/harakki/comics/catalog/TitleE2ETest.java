@@ -10,7 +10,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class TitleE2ETest extends BaseIntegrationTest {
 
@@ -34,7 +35,7 @@ class TitleE2ETest extends BaseIntegrationTest {
                 .andReturn();
 
         var body = jsonMapper.readTree(result.getResponse().getContentAsString());
-        return body.get("id").asText();
+        return body.get("id").asString();
     }
 
     @Test

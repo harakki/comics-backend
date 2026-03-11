@@ -6,7 +6,8 @@ import dev.harakki.comics.content.api.ChapterReadEvent;
 import dev.harakki.comics.content.api.ChapterUpdatedEvent;
 import dev.harakki.comics.content.domain.Chapter;
 import dev.harakki.comics.content.domain.Page;
-import dev.harakki.comics.content.dto.*;
+import dev.harakki.comics.content.dto.ChapterCreateRequest;
+import dev.harakki.comics.content.dto.ChapterReadRequest;
 import dev.harakki.comics.content.infrastructure.ChapterMapper;
 import dev.harakki.comics.content.infrastructure.ChapterRepository;
 import dev.harakki.comics.media.api.MediaUrlProvider;
@@ -31,7 +32,8 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ChapterServiceTest {

@@ -36,14 +36,15 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
 
-    // Spring Modulith
-    implementation("org.springframework.modulith:spring-modulith-starter-core")
-    implementation("org.springframework.modulith:spring-modulith-starter-jpa")
-    runtimeOnly("org.springframework.modulith:spring-modulith-actuator")
-    runtimeOnly("org.springframework.modulith:spring-modulith-observability")
+    // OpenAPI
+    implementation(libs.springdoc.openapi.starter.webmvc.ui)
+    implementation(libs.springdoc.openapi.starter.webmvc.scalar)
 
     // Amazon AWS S3
     implementation(libs.awssdk.s3)
+
+    // Specification API
+    implementation(libs.specification.arg.resolver)
 
     // Other Libraries
     implementation(libs.icu4j)
@@ -51,15 +52,15 @@ dependencies {
     implementation(libs.slugify)
     implementation(libs.uuid.creator)
 
-    // OpenAPI
-    implementation(libs.springdoc.openapi.starter.webmvc.ui)
-    implementation(libs.springdoc.openapi.starter.webmvc.scalar)
-
-    // Specification API
-    implementation(libs.specification.arg.resolver)
-
     // Bill of Materials
     implementation(platform(libs.spring.modulith.bom))
+
+    // Spring Modulith
+    implementation("org.springframework.modulith:spring-modulith-starter-core")
+    implementation("org.springframework.modulith:spring-modulith-starter-jpa")
+    runtimeOnly("org.springframework.modulith:spring-modulith-actuator")
+    runtimeOnly("org.springframework.modulith:spring-modulith-observability")
+
 
     // Database
     runtimeOnly("org.postgresql:postgresql")
@@ -90,7 +91,7 @@ dependencies {
     testImplementation(libs.mockito.core)
     testImplementation(libs.testcontainers.minio)
     testImplementation(libs.testcontainers.keycloak)
-    
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,14 +27,12 @@ public interface LibraryApi {
             operationId = "addOrUpdateLibraryEntry",
             summary = "Add or update library entry"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Library entry added or updated",
-                    content = @Content(schema = @Schema(implementation = LibraryEntryResponse.class))),
-            @ApiResponse(responseCode = "400", ref = "BadRequest"),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "403", ref = "Forbidden"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Library entry added or updated",
+            content = @Content(schema = @Schema(implementation = LibraryEntryResponse.class)))
+    @ApiResponse(responseCode = "400", ref = "BadRequest")
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "403", ref = "Forbidden")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     LibraryEntryResponse addOrUpdateLibraryEntry(
             @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId,
             @Valid LibraryEntryUpdateRequest request
@@ -45,22 +42,18 @@ public interface LibraryApi {
             operationId = "getLibraryEntry",
             summary = "Get library entry by title ID"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Library entry found",
-                    content = @Content(schema = @Schema(implementation = LibraryEntryResponse.class))),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Library entry found",
+            content = @Content(schema = @Schema(implementation = LibraryEntryResponse.class)))
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     LibraryEntryResponse getLibraryEntry(@Parameter(description = "Title UUID", required = true) @NotNull UUID titleId);
 
     @Operation(
             operationId = "getMyLibrary",
             summary = "Get my library"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Library entries retrieved"),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized")
-    })
+    @ApiResponse(responseCode = "200", description = "Library entries retrieved")
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
     Page<LibraryEntryResponse> getMyLibrary(
             @Parameter(hidden = true) Specification<LibraryEntry> spec,
             @ParameterObject Pageable pageable
@@ -70,12 +63,10 @@ public interface LibraryApi {
             operationId = "deleteLibraryEntry",
             summary = "Delete library entry"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Title removed from library"),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "403", ref = "Forbidden"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "204", description = "Title removed from library")
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "403", ref = "Forbidden")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     void deleteLibraryEntry(@Parameter(description = "Library entry UUID", required = true) @NotNull UUID entryId);
 
 }

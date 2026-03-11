@@ -7,7 +7,6 @@ import dev.harakki.comics.catalog.domain.Publisher;
 import dev.harakki.comics.catalog.dto.PublisherCreateRequest;
 import dev.harakki.comics.catalog.dto.PublisherResponse;
 import dev.harakki.comics.catalog.dto.PublisherUpdateRequest;
-import dev.harakki.comics.catalog.dto.ReplaceSlugRequest;
 import dev.harakki.comics.catalog.infrastructure.PublisherMapper;
 import dev.harakki.comics.catalog.infrastructure.PublisherRepository;
 import dev.harakki.comics.media.api.MediaDeleteRequestedEvent;
@@ -16,7 +15,6 @@ import dev.harakki.comics.shared.exception.ResourceAlreadyExistsException;
 import dev.harakki.comics.shared.exception.ResourceInUseException;
 import dev.harakki.comics.shared.exception.ResourceNotFoundException;
 import dev.harakki.comics.shared.utils.SecurityUtils;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -76,7 +74,7 @@ public class PublisherService {
             var userId = SecurityUtils.getOptionalCurrentUserId().orElse(null);
             eventPublisher.publishEvent(new PublisherCreatedEvent(publisher.getId(), userId, publisher.getName()));
 
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             throw new ResourceAlreadyExistsException("Publisher with this name or slug already exists");
         }
 
@@ -148,7 +146,7 @@ public class PublisherService {
             eventPublisher.publishEvent(new PublisherDeletedEvent(publisher.getId(), userId));
 
             log.info("Deleted publisher: id={}", id);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             throw new ResourceInUseException("Cannot delete publisher with id " + id + " because it is referenced by titles");
         }
     }

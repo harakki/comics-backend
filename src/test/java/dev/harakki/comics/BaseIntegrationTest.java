@@ -21,10 +21,12 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 @Import(TestcontainersConfiguration.class)
 public abstract class BaseIntegrationTest {
 
+    protected static final UUID ADMIN_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    protected static final UUID REGULAR_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    protected static final UUID OTHER_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000003");
+    protected MockMvc mockMvc;
     @Autowired
     private WebApplicationContext wac;
-
-    protected MockMvc mockMvc;
 
     @BeforeEach
     void setUpMockMvc() {
@@ -33,10 +35,6 @@ public abstract class BaseIntegrationTest {
                 .apply(springSecurity())
                 .build();
     }
-
-    protected static final UUID ADMIN_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
-    protected static final UUID REGULAR_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000002");
-    protected static final UUID OTHER_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000003");
 
     protected SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor adminJwt() {
         return jwt()

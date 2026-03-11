@@ -74,7 +74,7 @@ public class LibraryService {
 
                 eventPublisher.publishEvent(new LibraryAddTitleEvent(titleId, currentUserId));
                 log.info("Added title {} to library for user {} via addOrUpdate", titleId, currentUserId);
-            } catch (DataIntegrityViolationException e) {
+            } catch (DataIntegrityViolationException _) {
                 throw new ResourceAlreadyExistsException("Title already exists in library");
             }
 

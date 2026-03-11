@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,9 +22,9 @@ public class SlugGenerator {
     private final SlugSequenceRepository slugSequenceRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String generate(String sourceName, Function<String, Boolean> existenceCheck) {
+    public String generate(String sourceName, Predicate<String> existenceCheck) {
         String slugPrefix = slugify.slugify(sourceName);
-        if (!existenceCheck.apply(slugPrefix)) {
+        if (!existenceCheck.test(slugPrefix)) {
             return slugPrefix;
         }
 
@@ -43,7 +43,7 @@ public class SlugGenerator {
                 var newSlug = slugPrefix + "-" + nextVal;
 
                 // Double-check uniqueness
-                if (!existenceCheck.apply(newSlug)) {
+                if (!existenceCheck.test(newSlug)) {
                     return newSlug;
                 }
 

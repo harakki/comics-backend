@@ -5,7 +5,6 @@ import dev.harakki.comics.catalog.domain.Publisher;
 import dev.harakki.comics.catalog.dto.PublisherCreateRequest;
 import dev.harakki.comics.catalog.dto.PublisherResponse;
 import dev.harakki.comics.catalog.dto.PublisherUpdateRequest;
-import dev.harakki.comics.catalog.dto.ReplaceSlugRequest;
 import lombok.RequiredArgsConstructor;
 import net.kaczmarzyk.spring.data.jpa.domain.Equal;
 import net.kaczmarzyk.spring.data.jpa.domain.LikeIgnoreCase;

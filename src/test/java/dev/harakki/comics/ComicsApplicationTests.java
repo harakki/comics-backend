@@ -6,6 +6,7 @@ class ComicsApplicationTests {
 
     @Test
     void contextLoads() {
+        // Verifies that Spring application context loads
     }
 
 }

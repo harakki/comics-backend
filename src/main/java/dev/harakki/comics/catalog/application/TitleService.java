@@ -51,6 +51,7 @@ public class TitleService {
 
     @Transactional
     public TitleResponse create(TitleCreateRequest request) {
+        // TODO Cognitive Complexity of methods should not be too high
         if (titleRepository.existsByName(request.name())) {
             throw new ResourceAlreadyExistsException("Title with name '" + request.name() + "' already exists");
         }
@@ -122,7 +123,7 @@ public class TitleService {
             var userId = SecurityUtils.getOptionalCurrentUserId().orElse(null);
             eventPublisher.publishEvent(new TitleCreatedEvent(title.getId(), userId, title.getName()));
 
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             throw new ResourceAlreadyExistsException("Title with this slug already exists");
         }
 
@@ -147,6 +148,7 @@ public class TitleService {
 
     @Transactional
     public TitleResponse update(UUID id, TitleUpdateRequest request) {
+        // TODO Cognitive Complexity of methods should not be too high
         var title = titleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Title with id " + id + " not found"));
 
@@ -238,7 +240,7 @@ public class TitleService {
             eventPublisher.publishEvent(new TitleDeletedEvent(title.getId(), userId));
 
             log.info("Deleted title: id={}", id);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             throw new ResourceInUseException("Cannot delete title with id " + id + " because it is referenced by other resources");
         }
     }

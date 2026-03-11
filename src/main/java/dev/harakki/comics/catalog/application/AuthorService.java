@@ -74,7 +74,7 @@ public class AuthorService {
             var userId = SecurityUtils.getOptionalCurrentUserId().orElse(null);
             eventPublisher.publishEvent(new AuthorCreatedEvent(author.getId(), userId, author.getName()));
 
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             throw new ResourceAlreadyExistsException("Author with this name or slug already exists");
         }
 
@@ -143,7 +143,7 @@ public class AuthorService {
             eventPublisher.publishEvent(new AuthorDeletedEvent(author.getId(), userId));
 
             log.info("Deleted author: id={}", id);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             throw new ResourceInUseException("Cannot delete author with id " + id + " because it is referenced by titles");
         }
     }

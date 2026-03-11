@@ -1,7 +1,6 @@
 package dev.harakki.comics.catalog.web;
 
 import dev.harakki.comics.catalog.application.TagService;
-import dev.harakki.comics.catalog.dto.ReplaceSlugRequest;
 import dev.harakki.comics.catalog.dto.TagCreateRequest;
 import dev.harakki.comics.catalog.dto.TagResponse;
 import dev.harakki.comics.catalog.dto.TagUpdateRequest;

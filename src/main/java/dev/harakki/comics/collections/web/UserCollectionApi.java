@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -30,11 +29,9 @@ public interface UserCollectionApi {
                     @SecurityRequirement(name = "bearer-jwt")
             }
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Collection retrieved",
-                    content = @Content(schema = @Schema(implementation = UserCollectionResponse.class))),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Collection retrieved",
+            content = @Content(schema = @Schema(implementation = UserCollectionResponse.class)))
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     UserCollectionResponse getCollection(
             @Parameter(description = "Collection UUID", required = true) @NotNull UUID id
     );
@@ -53,11 +50,9 @@ public interface UserCollectionApi {
             operationId = "getMyCollections",
             summary = "Get my collections"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Collections retrieved",
-                    content = @Content(schema = @Schema(implementation = UserCollectionResponse.class))),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized")
-    })
+    @ApiResponse(responseCode = "200", description = "Collections retrieved",
+            content = @Content(schema = @Schema(implementation = UserCollectionResponse.class)))
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
     Page<UserCollectionResponse> getMyCollections(
             @Parameter(description = "Search query") String search,
             @ParameterObject Pageable pageable
@@ -68,12 +63,10 @@ public interface UserCollectionApi {
             operationId = "createCollection",
             summary = "Create collection"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Collection created",
-                    content = @Content(schema = @Schema(implementation = UserCollectionResponse.class))),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "400", ref = "BadRequest")
-    })
+    @ApiResponse(responseCode = "201", description = "Collection created",
+            content = @Content(schema = @Schema(implementation = UserCollectionResponse.class)))
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "400", ref = "BadRequest")
     UserCollectionResponse createCollection(@Valid CollectionCreateRequest request);
 
     @SecurityRequirement(name = "bearer-jwt")
@@ -81,14 +74,12 @@ public interface UserCollectionApi {
             operationId = "updateCollection",
             summary = "Update collection"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Collection updated",
-                    content = @Content(schema = @Schema(implementation = UserCollectionResponse.class))),
-            @ApiResponse(responseCode = "400", ref = "BadRequest"),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "403", ref = "Forbidden"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Collection updated",
+            content = @Content(schema = @Schema(implementation = UserCollectionResponse.class)))
+    @ApiResponse(responseCode = "400", ref = "BadRequest")
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "403", ref = "Forbidden")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     UserCollectionResponse updateCollection(
             @Parameter(description = "Collection UUID", required = true) @NotNull UUID id,
             @Valid CollectionUpdateRequest request
@@ -99,12 +90,10 @@ public interface UserCollectionApi {
             operationId = "deleteCollection",
             summary = "Delete collection"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Collection deleted"),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "403", ref = "Forbidden"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "204", description = "Collection deleted")
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "403", ref = "Forbidden")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     void deleteCollection(
             @Parameter(description = "Collection UUID", required = true) @NotNull UUID id
     );
@@ -114,13 +103,11 @@ public interface UserCollectionApi {
             operationId = "addTitleToCollection",
             summary = "Add a title to collection"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Title added to collection",
-                    content = @Content(schema = @Schema(implementation = UserCollectionResponse.class))),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "403", ref = "Forbidden"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Title added to collection",
+            content = @Content(schema = @Schema(implementation = UserCollectionResponse.class)))
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "403", ref = "Forbidden")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     UserCollectionResponse addTitle(
             @Parameter(description = "Collection UUID", required = true) @NotNull UUID id,
             @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId
@@ -131,13 +118,11 @@ public interface UserCollectionApi {
             operationId = "removeTitleFromCollection",
             summary = "Remove a title from collection"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Title removed from collection",
-                    content = @Content(schema = @Schema(implementation = UserCollectionResponse.class))),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "403", ref = "Forbidden"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Title removed from collection",
+            content = @Content(schema = @Schema(implementation = UserCollectionResponse.class)))
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "403", ref = "Forbidden")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     UserCollectionResponse removeTitle(
             @Parameter(description = "Collection UUID", required = true) @NotNull UUID id,
             @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId

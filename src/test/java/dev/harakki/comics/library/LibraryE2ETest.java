@@ -10,7 +10,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class LibraryE2ETest extends BaseIntegrationTest {
 
@@ -79,7 +80,7 @@ class LibraryE2ETest extends BaseIntegrationTest {
                 .andReturn();
 
         var body = jsonMapper.readTree(result.getResponse().getContentAsString());
-        String entryId = body.get("id").asText();
+        String entryId = body.get("id").asString();
 
         mockMvc.perform(delete("/api/v1/library/{entryId}", entryId)
                         .with(userJwt()))

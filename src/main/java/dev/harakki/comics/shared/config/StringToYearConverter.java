@@ -12,7 +12,7 @@ public class StringToYearConverter implements Converter<String, Year> {
     public Year convert(String source) {
         try {
             return Year.parse(source);
-        } catch (Exception e) {
+        } catch (Exception _) {
             return null;
         }
     }

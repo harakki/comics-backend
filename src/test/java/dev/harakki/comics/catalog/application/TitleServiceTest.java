@@ -4,7 +4,9 @@ import dev.harakki.comics.catalog.api.TitleCreatedEvent;
 import dev.harakki.comics.catalog.api.TitleDeletedEvent;
 import dev.harakki.comics.catalog.api.TitleViewedEvent;
 import dev.harakki.comics.catalog.domain.*;
-import dev.harakki.comics.catalog.dto.*;
+import dev.harakki.comics.catalog.dto.TitleCreateRequest;
+import dev.harakki.comics.catalog.dto.TitleResponse;
+import dev.harakki.comics.catalog.dto.TitleUpdateRequest;
 import dev.harakki.comics.catalog.infrastructure.*;
 import dev.harakki.comics.shared.exception.ResourceAlreadyExistsException;
 import dev.harakki.comics.shared.exception.ResourceNotFoundException;
@@ -26,7 +28,8 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

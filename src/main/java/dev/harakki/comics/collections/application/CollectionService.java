@@ -7,8 +7,10 @@ import dev.harakki.comics.collections.dto.UserCollectionResponse;
 import dev.harakki.comics.collections.infrastructure.CollectionMapper;
 import dev.harakki.comics.collections.infrastructure.CollectionRepository;
 import dev.harakki.comics.shared.exception.ResourceAlreadyExistsException;
+import dev.harakki.comics.shared.exception.ResourceNotCreatedException;
 import dev.harakki.comics.shared.exception.ResourceNotFoundException;
 import dev.harakki.comics.shared.utils.SecurityUtils;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -35,6 +37,9 @@ public class CollectionService {
 
     private final ApplicationEventPublisher eventPublisher;
 
+    @Resource
+    private CollectionService self;
+
     @Transactional
     public UserCollectionResponse create(CollectionCreateRequest request) {
         UUID currentUserId = getCurrentUserId();
@@ -57,7 +62,7 @@ public class CollectionService {
                     entity.getName()
             ));
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Failed to create collection: " + e.getMessage());
+            throw new ResourceNotCreatedException("Failed to create collection: " + e.getMessage());
         }
 
         return collectionMapper.toResponse(entity);
@@ -69,11 +74,12 @@ public class CollectionService {
         var entity = collectionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Collection not found"));
 
-        if (!entity.getIsPublic()) {
-            if (currentUserId.isEmpty() || !entity.getAuthorId().equals(currentUserId.get())) {
-                throw new AccessDeniedException("Collection is private");
-            }
+        if (Boolean.FALSE.equals(entity.getIsPublic())
+                && (currentUserId.isEmpty()
+                || !entity.getAuthorId().equals(currentUserId.get()))) {
+            throw new AccessDeniedException("Collection is private");
         }
+
 
         return collectionMapper.toResponse(entity);
     }
@@ -106,11 +112,12 @@ public class CollectionService {
         }
 
         // Check if new name already exists (and it's different from current)
-        if (request.name() != null && !request.name().equals(entity.getName())) {
-            if (collectionRepository.existsByAuthorIdAndNameAndIdNot(currentUserId, request.name(), id)) {
-                throw new ResourceAlreadyExistsException("Collection with name '" + request.name() + "' already exists");
-            }
+        if (request.name() != null
+                && !request.name().equals(entity.getName())
+                && collectionRepository.existsByAuthorIdAndNameAndIdNot(currentUserId, request.name(), id)) {
+            throw new ResourceAlreadyExistsException("Collection with name '" + request.name() + "' already exists");
         }
+
 
         entity = collectionMapper.partialUpdate(request, entity);
 
@@ -151,7 +158,7 @@ public class CollectionService {
 
         combined.add(titleId);
         var updateRequest = new CollectionUpdateRequest(null, null, null, combined);
-        var result = update(id, updateRequest);
+        var result = self.update(id, updateRequest);
         eventPublisher.publishEvent(new CollectionTitleAddedEvent(id, titleId, currentUserId));
 
         return result;
@@ -162,7 +169,7 @@ public class CollectionService {
         var existing = getById(id);
         var ids = existing.titleIds().stream().filter(t -> !t.equals(titleId)).toList();
         var update = new CollectionUpdateRequest(null, null, null, ids);
-        var result = update(id, update);
+        var result = self.update(id, update);
 
         eventPublisher.publishEvent(new CollectionTitleRemovedEvent(id, titleId, currentUserId));
 

@@ -7,9 +7,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -24,11 +22,9 @@ public interface ChapterApi {
             operationId = "getChaptersInfoByTitle",
             summary = "Get chapters info for title"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Chapters retrieved",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ChapterSummaryResponse.class)))),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Chapters retrieved",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ChapterSummaryResponse.class))))
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     List<ChapterSummaryResponse> getChaptersInfoByTitle(
             @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId
     );
@@ -37,11 +33,9 @@ public interface ChapterApi {
             operationId = "getFullChapter",
             summary = "Get full chapter (including pages URLs)"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Chapter details",
-                    content = @Content(schema = @Schema(implementation = ChapterDetailsResponse.class))),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Chapter details",
+            content = @Content(schema = @Schema(implementation = ChapterDetailsResponse.class)))
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     ChapterDetailsResponse getFullChapter(
             @Parameter(description = "Chapter UUID", required = true) @NotNull UUID chapterId
     );
@@ -51,13 +45,11 @@ public interface ChapterApi {
             operationId = "createChapter",
             summary = "Create chapter"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Chapter created"),
-            @ApiResponse(responseCode = "400", ref = "BadRequest"),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "403", ref = "Forbidden"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "201", description = "Chapter created")
+    @ApiResponse(responseCode = "400", ref = "BadRequest")
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "403", ref = "Forbidden")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     void createChapter(
             @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId,
             @Valid ChapterCreateRequest request
@@ -68,13 +60,11 @@ public interface ChapterApi {
             operationId = "updateChapter",
             summary = "Update chapter"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Chapter updated"),
-            @ApiResponse(responseCode = "400", ref = "BadRequest"),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "403", ref = "Forbidden"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Chapter updated")
+    @ApiResponse(responseCode = "400", ref = "BadRequest")
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "403", ref = "Forbidden")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     void updateChapter(
             @Parameter(description = "Chapter UUID", required = true) @NotNull UUID chapterId,
             @Valid ChapterUpdateRequest request
@@ -85,12 +75,10 @@ public interface ChapterApi {
             operationId = "deleteChapter",
             summary = "Delete chapter"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Chapter deleted"),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "403", ref = "Forbidden"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "204", description = "Chapter deleted")
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "403", ref = "Forbidden")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     void deleteChapter(
             @Parameter(description = "Chapter UUID", required = true) @NotNull UUID chapterId
     );
@@ -100,12 +88,10 @@ public interface ChapterApi {
             operationId = "recordChapterRead",
             summary = "Record chapter as read and get next unread chapter"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Chapter marked as read, next unread chapter returned",
-                    content = @Content(schema = @Schema(implementation = NextChapterResponse.class))),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Chapter marked as read, next unread chapter returned",
+            content = @Content(schema = @Schema(implementation = NextChapterResponse.class)))
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     @SecurityRequirement(name = "bearer-jwt")
     NextChapterResponse recordChapterRead(
             @Parameter(description = "Chapter UUID", required = true) @NotNull UUID chapterId,
@@ -117,12 +103,10 @@ public interface ChapterApi {
             operationId = "isChapterRead",
             summary = "Check if chapter has been read by current user"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Read status",
-                    content = @Content(schema = @Schema(implementation = ChapterReadStatusResponse.class))),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Read status",
+            content = @Content(schema = @Schema(implementation = ChapterReadStatusResponse.class)))
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     @SecurityRequirement(name = "bearer-jwt")
     ChapterReadStatusResponse isChapterRead(
             @Parameter(description = "Chapter UUID", required = true) @NotNull UUID chapterId
@@ -133,12 +117,10 @@ public interface ChapterApi {
             operationId = "getNextUnreadChapter",
             summary = "Get next unread chapter for a title"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Next unread chapter",
-                    content = @Content(schema = @Schema(implementation = NextChapterResponse.class))),
-            @ApiResponse(responseCode = "401", ref = "Unauthorized"),
-            @ApiResponse(responseCode = "404", ref = "NotFound")
-    })
+    @ApiResponse(responseCode = "200", description = "Next unread chapter",
+            content = @Content(schema = @Schema(implementation = NextChapterResponse.class)))
+    @ApiResponse(responseCode = "401", ref = "Unauthorized")
+    @ApiResponse(responseCode = "404", ref = "NotFound")
     @SecurityRequirement(name = "bearer-jwt")
     NextChapterResponse getNextUnreadChapter(
             @Parameter(description = "Title UUID", required = true) @NotNull UUID titleId

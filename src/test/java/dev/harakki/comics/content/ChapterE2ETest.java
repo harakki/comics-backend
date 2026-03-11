@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ChapterE2ETest extends BaseIntegrationTest {
 
@@ -36,7 +37,7 @@ class ChapterE2ETest extends BaseIntegrationTest {
                 .andReturn();
 
         var body = jsonMapper.readTree(result.getResponse().getContentAsString());
-        return body.get("id").asText();
+        return body.get("id").asString();
     }
 
     private String createChapterAndGetId(String titleId) throws Exception {
@@ -57,7 +58,7 @@ class ChapterE2ETest extends BaseIntegrationTest {
                 .andReturn();
 
         var body = jsonMapper.readTree(chapters.getResponse().getContentAsString());
-        return body.get(0).get("id").asText();
+        return body.get(0).get("id").asString();
     }
 
     @Test

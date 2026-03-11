@@ -110,7 +110,7 @@ public class MediaService implements MediaUrlProvider {
 
     @Transactional
     public void deleteMediaById(UUID mediaId) {
-        var media = mediaRepository.findById(mediaId)
+        mediaRepository.findById(mediaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Media with id " + mediaId + " not found"));
 
         eventPublisher.publishEvent(new MediaDeleteRequestedEvent(mediaId));

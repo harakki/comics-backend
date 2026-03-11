@@ -10,7 +10,6 @@ import dev.harakki.comics.collections.dto.UserCollectionResponse;
 import dev.harakki.comics.collections.infrastructure.CollectionMapper;
 import dev.harakki.comics.collections.infrastructure.CollectionRepository;
 import dev.harakki.comics.shared.exception.ResourceAlreadyExistsException;
-import dev.harakki.comics.shared.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

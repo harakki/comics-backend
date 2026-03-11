@@ -1,6 +1,5 @@
 package dev.harakki.comics.catalog.application;
 
-import dev.harakki.comics.catalog.dto.ReplaceSlugRequest;
 import dev.harakki.comics.catalog.dto.TagCreateRequest;
 import dev.harakki.comics.catalog.dto.TagResponse;
 import dev.harakki.comics.catalog.dto.TagUpdateRequest;
@@ -9,7 +8,6 @@ import dev.harakki.comics.catalog.infrastructure.TagRepository;
 import dev.harakki.comics.shared.exception.ResourceAlreadyExistsException;
 import dev.harakki.comics.shared.exception.ResourceInUseException;
 import dev.harakki.comics.shared.exception.ResourceNotFoundException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -54,7 +52,7 @@ public class TagService {
         try {
             tag = tagRepository.save(tag);
             log.info("Created tag: id={}, name={}, type={}", tag.getId(), tag.getName(), tag.getType());
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             throw new ResourceAlreadyExistsException("Tag with this name or slug already exists");
         }
 
@@ -97,7 +95,7 @@ public class TagService {
             tagRepository.delete(tag);
             tagRepository.flush();
             log.info("Deleted tag: id={}", id);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             throw new ResourceInUseException("Cannot delete tag with id " + id + " because it is referenced by titles");
         }
     }
