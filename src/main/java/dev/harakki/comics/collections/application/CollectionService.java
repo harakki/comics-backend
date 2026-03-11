@@ -37,9 +37,6 @@ public class CollectionService {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    @Resource
-    private CollectionService self;
-
     @Transactional
     public UserCollectionResponse create(CollectionCreateRequest request) {
         UUID currentUserId = getCurrentUserId();
@@ -147,6 +144,7 @@ public class CollectionService {
         log.info("Deleted collection: id={} by user {}", id, currentUserId);
     }
 
+    @Transactional
     public UserCollectionResponse addTitle(UUID id, UUID titleId) {
         var currentUserId = getCurrentUserId();
         var existing = getById(id);
@@ -158,18 +156,19 @@ public class CollectionService {
 
         combined.add(titleId);
         var updateRequest = new CollectionUpdateRequest(null, null, null, combined);
-        var result = self.update(id, updateRequest);
+        var result = update(id, updateRequest);
         eventPublisher.publishEvent(new CollectionTitleAddedEvent(id, titleId, currentUserId));
 
         return result;
     }
 
+    @Transactional
     public UserCollectionResponse removeTitle(UUID id, UUID titleId) {
         var currentUserId = getCurrentUserId();
         var existing = getById(id);
         var ids = existing.titleIds().stream().filter(t -> !t.equals(titleId)).toList();
         var update = new CollectionUpdateRequest(null, null, null, ids);
-        var result = self.update(id, update);
+        var result = update(id, update);
 
         eventPublisher.publishEvent(new CollectionTitleRemovedEvent(id, titleId, currentUserId));
 
