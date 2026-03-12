@@ -50,11 +50,20 @@ jobs:
       - name: Prepare Image Name
         run: echo "IMAGE_NAME=${REGISTRY}/${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
+      - name: Get Git version
+        id: git_version
+        run: |
+          echo "COMMIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          VERSION=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Build and Push via Jib
         run: |
-          chmod +x ./gradlew
           ./gradlew jib \
-            -Djib.to.image=${{ env.IMAGE_NAME }}:${{ github.sha }} \
-            -Djib.to.tags=latest \
+            -Djib.to.image=${{ env.IMAGE_NAME }}:${{ github.COMMIT_SHA  }} \
+            -Djib.to.tags=latest,${{ env.VERSION }} \
             -Djib.to.auth.username=${{ github.actor }} \
             -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }}
