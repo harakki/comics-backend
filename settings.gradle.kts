@@ -1,1 +1,1 @@
-rootProject.name = "comics"
+rootProject.name = "harakki-comics"
