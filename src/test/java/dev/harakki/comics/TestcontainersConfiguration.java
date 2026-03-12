@@ -12,12 +12,12 @@ public class TestcontainersConfiguration {
     @Bean
     @ServiceConnection
     PostgreSQLContainer postgresContainer() {
-        return new PostgreSQLContainer("postgres:latest");
+        return new PostgreSQLContainer("postgres:18.3-alpine");
     }
 
     @Bean
     MinIOContainer minioContainer() {
-        var container = new MinIOContainer("minio/minio:latest")
+        var container = new MinIOContainer("minio/minio:RELEASE.2025-09-07T16-13-09Z")
                 .withEnv("MINIO_ROOT_USER", "minioadmin")
                 .withEnv("MINIO_ROOT_PASSWORD", "minioadmin");
         container.start();
