@@ -1,6 +1,7 @@
 package dev.harakki.comics.media.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import dev.harakki.comics.shared.config.properties.S3Properties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,33 +16,21 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import java.net.URI;
 import java.util.logging.Logger;
 
+@RequiredArgsConstructor
 @Configuration
 class S3Config {
 
     Logger logger = Logger.getLogger(getClass().getName());
 
-    @Value("${s3.region}")
-    private String region;
-
-    @Value("${s3.endpoint}")
-    private String endpoint;
-
-    @Value("${s3.access-key}")
-    private String accessKey;
-
-    @Value("${s3.secret-key}")
-    private String secretKey;
-
-    @Value("${s3.bucket}")
-    private String bucket;
+    private final S3Properties s3Properties;
 
     @Bean
     public S3Client s3Client() {
-        var credentials = AwsBasicCredentials.create(accessKey, secretKey);
+        var credentials = AwsBasicCredentials.create(s3Properties.getAccessKey(), s3Properties.getSecretKey());
 
         return S3Client.builder()
-                .region(Region.of(region))
-                .endpointOverride(URI.create(endpoint))
+                .region(Region.of(s3Properties.getRegion()))
+                .endpointOverride(URI.create(s3Properties.getEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .forcePathStyle(true)
                 .build();
@@ -49,11 +38,11 @@ class S3Config {
 
     @Bean
     public S3Presigner s3Presigner() {
-        var credentials = AwsBasicCredentials.create(accessKey, secretKey);
+        var credentials = AwsBasicCredentials.create(s3Properties.getAccessKey(), s3Properties.getSecretKey());
 
         return S3Presigner.builder()
-                .region(Region.of(region))
-                .endpointOverride(URI.create(endpoint))
+                .region(Region.of(s3Properties.getRegion()))
+                .endpointOverride(URI.create(s3Properties.getEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)
@@ -65,10 +54,10 @@ class S3Config {
     CommandLineRunner initBucket(S3Client s3Client) {
         return _ -> {
             try {
-                s3Client.headBucket(b -> b.bucket(bucket));
+                s3Client.headBucket(b -> b.bucket(s3Properties.getBucket()));
             } catch (NoSuchBucketException _) {
-                s3Client.createBucket(b -> b.bucket(bucket));
-                logger.info("Bucket '" + bucket + "' created.");
+                s3Client.createBucket(b -> b.bucket(s3Properties.getBucket()));
+                logger.info("Bucket '" + s3Properties.getBucket() + "' created.");
             }
         };
     }

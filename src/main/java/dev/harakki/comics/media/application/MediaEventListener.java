@@ -3,9 +3,9 @@ package dev.harakki.comics.media.application;
 import dev.harakki.comics.media.api.MediaDeleteRequestedEvent;
 import dev.harakki.comics.media.api.MediaFixateRequestedEvent;
 import dev.harakki.comics.media.infrastructure.MediaRepository;
+import dev.harakki.comics.shared.config.properties.S3Properties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -24,8 +24,7 @@ public class MediaEventListener {
 
     private final S3Client s3Client;
 
-    @Value("${s3.bucket}")
-    private String bucket;
+    private final S3Properties s3Properties;
 
     @Async
     @ApplicationModuleListener
@@ -43,7 +42,7 @@ public class MediaEventListener {
             return;
         }
 
-        var headObject = s3Client.headObject(b -> b.bucket(bucket).key(media.getS3Key()));
+        var headObject = s3Client.headObject(b -> b.bucket(s3Properties.getBucket()).key(media.getS3Key()));
         media.setSize(headObject.contentLength());
         media.setContentType(headObject.contentType());
         media.commit();
@@ -68,7 +67,7 @@ public class MediaEventListener {
     }
 
     private void deleteFromS3(String key) {
-        s3Client.deleteObject(b -> b.bucket(bucket).key(key));
+        s3Client.deleteObject(b -> b.bucket(s3Properties.getBucket()).key(key));
     }
 
 }

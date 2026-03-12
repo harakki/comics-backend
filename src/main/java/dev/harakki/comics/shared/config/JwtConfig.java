@@ -1,5 +1,7 @@
 package dev.harakki.comics.shared.config;
 
+import dev.harakki.comics.shared.config.properties.JwtProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,29 +15,25 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 @Configuration
+@RequiredArgsConstructor
 public class JwtConfig {
+
+    private final JwtProperties jwtProperties;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
     private String jwkSetUri;
 
-    @Value("${auth.jwt.connect-timeout:2s}")
-    private Duration connectTimeout;
-
-    @Value("${auth.jwt.read-timeout:2s}")
-    private Duration readTimeout;
-
     @Bean
     public JwtDecoder jwtDecoder() {
         var factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(connectTimeout);
-        factory.setReadTimeout(readTimeout);
+        factory.setConnectTimeout(jwtProperties.getConnectTimeout());
+        factory.setReadTimeout(jwtProperties.getReadTimeout());
 
         var restTemplate = new RestTemplate(factory);
 

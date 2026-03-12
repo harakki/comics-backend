@@ -3,10 +3,10 @@ package dev.harakki.comics.media.application;
 import dev.harakki.comics.media.domain.Media;
 import dev.harakki.comics.media.domain.MediaStatus;
 import dev.harakki.comics.media.infrastructure.MediaRepository;
+import dev.harakki.comics.shared.config.properties.S3Properties;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -27,8 +27,7 @@ class MediaCleanupScheduler {
 
     private final S3Client s3Client;
 
-    @Value("${s3.bucket}")
-    private String bucket;
+    private final S3Properties s3Properties;
 
     @Transactional
     @Scheduled(fixedRateString = "PT60M") // Run every 60 minutes
@@ -48,7 +47,7 @@ class MediaCleanupScheduler {
         try {
             // Bulk delete from S3
             var deleteResponse = s3Client.deleteObjects(b -> b
-                    .bucket(bucket)
+                    .bucket(s3Properties.getBucket())
                     .delete(d -> d.objects(objectIds))
             );
             log.info("Deleted {} objects from S3", deleteResponse.deleted().size());

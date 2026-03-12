@@ -7,10 +7,10 @@ import dev.harakki.comics.media.domain.Media;
 import dev.harakki.comics.media.domain.MediaStatus;
 import dev.harakki.comics.media.dto.MediaUploadUrlResponse;
 import dev.harakki.comics.media.infrastructure.MediaRepository;
+import dev.harakki.comics.shared.config.properties.S3Properties;
 import dev.harakki.comics.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,8 +38,7 @@ public class MediaService implements MediaUrlProvider {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    @Value("${s3.bucket}")
-    private String bucket;
+    private final S3Properties s3Properties;
 
     @Transactional
     public MediaUploadUrlResponse getUploadUrl(String originalFilename, String contentType, Integer width,
@@ -55,7 +54,7 @@ public class MediaService implements MediaUrlProvider {
         var presignRequest = PutObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofMinutes(UPLOAD_MEDIA_URL_EXPIRATION_MINUTES))
                 .putObjectRequest(request -> request
-                        .bucket(bucket)
+                        .bucket(s3Properties.getBucket())
                         .key(s3Key)
                         .contentType(contentType)
                         .build())
@@ -64,7 +63,7 @@ public class MediaService implements MediaUrlProvider {
         // Save "promise" of the file (file in PENDING status)
         mediaRepository.save(Media.builder()
                 .id(mediaId)
-                .bucket(bucket)
+                .bucket(s3Properties.getBucket())
                 .s3Key(s3Key)
                 .originalFilename(originalFilename)
                 .contentType(contentType)
@@ -85,7 +84,7 @@ public class MediaService implements MediaUrlProvider {
                     // Generate presigned GET URL
                     var request = GetObjectPresignRequest.builder()
                             .signatureDuration(Duration.ofMinutes(MEDIA_URL_EXPIRATION_MINUTES))
-                            .getObjectRequest(b -> b.bucket(bucket).key(media.getS3Key()))
+                            .getObjectRequest(b -> b.bucket(s3Properties.getBucket()).key(media.getS3Key()))
                             .build();
                     return s3Presigner.presignGetObject(request).url().toString();
                 })
@@ -97,7 +96,7 @@ public class MediaService implements MediaUrlProvider {
     public String getPublicUrl(String s3Key) {
         var request = GetObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofMinutes(MEDIA_URL_EXPIRATION_MINUTES))
-                .getObjectRequest(b -> b.bucket(bucket).key(s3Key))
+                .getObjectRequest(b -> b.bucket(s3Properties.getBucket()).key(s3Key))
                 .build();
         return s3Presigner.presignGetObject(request).url().toString();
     }
