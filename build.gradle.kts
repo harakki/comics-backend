@@ -111,7 +111,7 @@ jib {
         image = "eclipse-temurin:25-jre-alpine"
     }
     to {
-        image = "uni-diploma-backend"
+        image = "harakki-comics"
         tags = setOf("latest")
     }
     container {
