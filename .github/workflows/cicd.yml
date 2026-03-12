@@ -63,7 +63,7 @@ jobs:
       - name: Build and Push via Jib
         run: |
           ./gradlew jib \
-            -Djib.to.image=${{ env.IMAGE_NAME }}:${{ github.COMMIT_SHA  }} \
+            -Djib.to.image=${{ env.IMAGE_NAME }}:${{ env.COMMIT_SHA }} \
             -Djib.to.tags=latest,${{ env.VERSION }} \
             -Djib.to.auth.username=${{ github.actor }} \
             -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }}
