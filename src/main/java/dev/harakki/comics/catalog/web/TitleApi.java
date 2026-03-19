@@ -42,7 +42,7 @@ public interface TitleApi {
     @Parameter(name = "type", description = "Filter by type", example = "MANGA")
     @Parameter(name = "titleStatus", description = "Filter by status", example = "COMPLETED")
     @Parameter(name = "country", description = "Filter by Country ISO Code", example = "JP")
-    @Parameter(name = "tags", description = "Filter by tag slugs", example = "action,shonen")
+    @Parameter(name = "tags", description = "Filter by tag UUIDs", example = "0195a69f-0c3e-7ca5-adf0-44ec2e4b5d1a")
     @Parameter(name = "releaseYear", description = "Release year", example = "2018")
     @Parameter(name = "yearFrom", description = "Min release year", example = "2000")
     @Parameter(name = "yearTo", description = "Max release year", example = "2020")

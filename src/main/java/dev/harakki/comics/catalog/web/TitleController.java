@@ -51,7 +51,7 @@ class TitleController implements TitleApi {
                     @Spec(path = Title_.RELEASE_YEAR, params = "yearFrom", spec = GreaterThanOrEqual.class),
                     @Spec(path = Title_.RELEASE_YEAR, params = "yearTo", spec = LessThanOrEqual.class),
                     @Spec(path = Title_.CONTENT_RATING, params = "contentRating", spec = LessThanOrEqual.class),
-                    @Spec(path = "t.slug", params = "tags", spec = In.class)
+                    @Spec(path = "t.id", params = "tags", spec = In.class)
             }) Specification<Title> filterSpec,
             @PageableDefault(sort = Title_.NAME) Pageable pageable
     ) {

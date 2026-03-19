@@ -9,6 +9,7 @@ import tools.jackson.databind.json.JsonMapper;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,6 +29,24 @@ class TitleE2ETest extends BaseIntegrationTest {
         );
 
         var result = mockMvc.perform(post("/api/v1/titles")
+                        .with(adminJwt())
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(jsonMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        var body = jsonMapper.readTree(result.getResponse().getContentAsString());
+        return body.get("id").asString();
+    }
+
+    private String createTagAndGetId(String name, String slug) throws Exception {
+        var request = Map.of(
+                "name", name,
+                "slug", slug,
+                "type", "GENRE"
+        );
+
+        var result = mockMvc.perform(post("/api/v1/tags")
                         .with(adminJwt())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(jsonMapper.writeValueAsString(request)))
@@ -93,6 +112,34 @@ class TitleE2ETest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/v1/titles"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray());
+    }
+
+    @Test
+    void getTitles_withTagIdFilter_returnsMatchingTitles() throws Exception {
+        String tagSlug = "genre-" + UUID.randomUUID().toString().substring(0, 8);
+        String tagId = createTagAndGetId("Genre " + tagSlug, tagSlug);
+
+        String matchingName = "Tagged " + UUID.randomUUID().toString().substring(0, 8);
+        var taggedTitleRequest = Map.of(
+                "name", matchingName,
+                "type", "MANGA",
+                "titleStatus", "ONGOING",
+                "contentRating", "SIX_PLUS",
+                "countryIsoCode", "JP",
+                "tagIds", java.util.List.of(tagId)
+        );
+
+        mockMvc.perform(post("/api/v1/titles")
+                        .with(adminJwt())
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(jsonMapper.writeValueAsString(taggedTitleRequest)))
+                .andExpect(status().isCreated());
+
+        createTitleAndGetId("Untagged " + UUID.randomUUID().toString().substring(0, 8));
+
+        mockMvc.perform(get("/api/v1/titles").param("tags", tagId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*].name", hasItem(matchingName)));
     }
 
     @Test
