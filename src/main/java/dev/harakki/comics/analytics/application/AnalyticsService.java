@@ -16,6 +16,7 @@ import dev.harakki.comics.library.api.LibraryVoteTitleEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -50,7 +51,7 @@ public class AnalyticsService {
         return userInteractionRepository.countByTargetIdAndType(titleId, InteractionType.TITLE_VIEWED);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordChapterRead(ChapterReadEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -63,7 +64,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordTitleVote(LibraryVoteTitleEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -76,7 +77,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordTitleView(TitleViewedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -86,7 +87,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordTitleAddToLibrary(LibraryAddTitleEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -96,7 +97,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordTitleRemoveFromLibrary(LibraryRemoveTitleEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -106,7 +107,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordTitleCreated(TitleCreatedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -117,7 +118,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordTitleUpdated(TitleUpdatedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -127,7 +128,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordTitleDeleted(TitleDeletedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -137,7 +138,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordAuthorCreated(AuthorCreatedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -148,7 +149,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordAuthorUpdated(AuthorUpdatedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -158,7 +159,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordAuthorDeleted(AuthorDeletedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -168,7 +169,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordPublisherCreated(PublisherCreatedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -179,7 +180,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordPublisherUpdated(PublisherUpdatedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -189,7 +190,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordPublisherDeleted(PublisherDeletedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -199,7 +200,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordChapterCreated(ChapterCreatedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -213,7 +214,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordChapterUpdated(ChapterUpdatedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -224,7 +225,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordChapterDeleted(ChapterDeletedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -235,7 +236,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordCollectionCreated(CollectionCreatedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -246,7 +247,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordCollectionUpdated(CollectionUpdatedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -256,7 +257,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordCollectionDeleted(CollectionDeletedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -266,7 +267,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordCollectionTitleAdded(CollectionTitleAddedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
@@ -277,7 +278,7 @@ public class AnalyticsService {
         userInteractionRepository.save(interaction);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordCollectionTitleRemoved(CollectionTitleRemovedEvent event) {
         var interaction = UserInteraction.builder()
                 .userId(event.userId())
