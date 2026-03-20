@@ -15,9 +15,27 @@ public interface UserInteractionRepository extends JpaRepository<UserInteraction
     long countByTargetIdAndType(UUID targetId, InteractionType type);
 
     @Query(value = """
-                SELECT AVG(CAST(metadata ->> 'rating' AS INTEGER))
-                FROM user_interactions
-                WHERE target_id = :titleId AND type = 'TITLE_RATED'
+                SELECT COALESCE(
+                    ROUND(
+                        AVG(
+                            CASE
+                                WHEN metadata ->> 'voteType' = 'LIKE' THEN 1
+                                WHEN metadata ->> 'voteType' = 'DISLIKE' THEN 0
+                            END
+                        ) * 100,
+                        1
+                    ),
+                    0
+                )
+                FROM (
+                    SELECT DISTINCT ON (user_id)
+                        user_id,
+                        metadata
+                    FROM user_interactions
+                    WHERE target_id = :titleId
+                      AND type = 'TITLE_VOTED'
+                    ORDER BY user_id, occurred_at DESC
+                ) t
             """, nativeQuery = true)
     Double getAverageRating(UUID titleId);
 
