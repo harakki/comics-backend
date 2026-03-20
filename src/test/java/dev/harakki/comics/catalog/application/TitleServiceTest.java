@@ -259,6 +259,27 @@ class TitleServiceTest {
     }
 
     @Test
+    void getById_withoutAuthentication_publishesTitleViewedEventWithNullUserId() {
+        var id = UUID.randomUUID();
+        var title = buildMinimalTitle(id);
+        var response = new TitleResponse(id, "One Piece", "one-piece", null, TitleType.MANGA,
+                TitleStatus.ONGOING, null, ContentRating.SIX_PLUS, false, "JP", null, List.of(), null, Set.of());
+
+        SecurityContextHolder.clearContext();
+
+        when(titleRepository.findById(id)).thenReturn(Optional.of(title));
+        when(titleMapper.toResponse(title)).thenReturn(response);
+
+        var result = titleService.getById(id);
+
+        assertThat(result).isEqualTo(response);
+        var captor = ArgumentCaptor.forClass(TitleViewedEvent.class);
+        verify(eventPublisher).publishEvent(captor.capture());
+        assertThat(captor.getValue().titleId()).isEqualTo(id);
+        assertThat(captor.getValue().userId()).isNull();
+    }
+
+    @Test
     void getById_whenNotFound_throwsException() {
         var id = UUID.randomUUID();
 

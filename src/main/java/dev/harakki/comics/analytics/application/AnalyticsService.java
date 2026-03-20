@@ -29,6 +29,8 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class AnalyticsService {
 
+    static final UUID ANONYMOUS_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
     private final UserInteractionRepository userInteractionRepository;
 
     public TitleAnalyticsResponse getTitleAnalytics(UUID titleId) {
@@ -79,12 +81,20 @@ public class AnalyticsService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordTitleView(TitleViewedEvent event) {
+        var isAnonymous = event.userId() == null;
+        var userId = isAnonymous ? ANONYMOUS_USER_ID : event.userId();
+
         var interaction = UserInteraction.builder()
-                .userId(event.userId())
+                .userId(userId)
                 .type(InteractionType.TITLE_VIEWED)
                 .targetId(event.titleId())
+                .metadata(isAnonymous ? Map.of("anonymous", true) : null)
                 .build();
         userInteractionRepository.save(interaction);
+
+        if (isAnonymous) {
+            log.debug("Recorded anonymous title view: titleId={}", event.titleId());
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

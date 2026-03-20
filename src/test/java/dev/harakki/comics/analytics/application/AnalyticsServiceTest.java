@@ -114,6 +114,23 @@ class AnalyticsServiceTest {
     }
 
     @Test
+    void recordTitleView_whenUserIdIsNull_savesAnonymousInteraction() {
+        var titleId = UUID.randomUUID();
+        var event = new TitleViewedEvent(titleId, null);
+
+        when(userInteractionRepository.save(any(UserInteraction.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        analyticsService.recordTitleView(event);
+
+        var captor = ArgumentCaptor.forClass(UserInteraction.class);
+        verify(userInteractionRepository).save(captor.capture());
+        assertThat(captor.getValue().getUserId()).isEqualTo(AnalyticsService.ANONYMOUS_USER_ID);
+        assertThat(captor.getValue().getType()).isEqualTo(InteractionType.TITLE_VIEWED);
+        assertThat(captor.getValue().getTargetId()).isEqualTo(titleId);
+        assertThat(captor.getValue().getMetadata()).containsEntry("anonymous", true);
+    }
+
+    @Test
     void recordTitleAddToLibrary_savesInteraction() {
         var userId = UUID.randomUUID();
         var titleId = UUID.randomUUID();
