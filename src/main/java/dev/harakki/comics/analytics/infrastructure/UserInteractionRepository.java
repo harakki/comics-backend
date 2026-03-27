@@ -6,11 +6,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface UserInteractionRepository extends JpaRepository<UserInteraction, Long> {
+
+    interface TopViewedTitleProjection {
+
+        UUID getTitleId();
+
+        Long getWeeklyViews();
+
+    }
 
     long countByTargetIdAndType(UUID targetId, InteractionType type);
 
@@ -38,6 +47,19 @@ public interface UserInteractionRepository extends JpaRepository<UserInteraction
                 ) t
             """, nativeQuery = true)
     Double getAverageRating(UUID titleId);
+
+    @Query(value = """
+            SELECT
+                target_id AS titleId,
+                COUNT(*) AS weeklyViews
+            FROM user_interactions
+            WHERE type = 'TITLE_VIEWED'
+              AND occurred_at >= :since
+            GROUP BY target_id
+            ORDER BY weeklyViews DESC, titleId ASC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<TopViewedTitleProjection> findTopViewedTitlesSince(Instant since, int limit);
 
     boolean existsByUserIdAndTargetIdAndType(UUID userId, UUID targetId, InteractionType type);
 

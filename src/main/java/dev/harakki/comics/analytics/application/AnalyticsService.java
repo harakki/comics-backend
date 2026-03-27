@@ -3,6 +3,7 @@ package dev.harakki.comics.analytics.application;
 import dev.harakki.comics.analytics.domain.InteractionType;
 import dev.harakki.comics.analytics.domain.UserInteraction;
 import dev.harakki.comics.analytics.dto.TitleAnalyticsResponse;
+import dev.harakki.comics.analytics.dto.WeeklyPopularTitleResponse;
 import dev.harakki.comics.analytics.infrastructure.UserInteractionRepository;
 import dev.harakki.comics.catalog.api.*;
 import dev.harakki.comics.collections.api.*;
@@ -19,9 +20,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,8 +35,11 @@ import java.util.UUID;
 public class AnalyticsService {
 
     static final UUID ANONYMOUS_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    private static final int WEEKLY_TOP_LIMIT = 10;
+    private static final Duration WEEKLY_TOP_WINDOW = Duration.ofDays(7);
 
     private final UserInteractionRepository userInteractionRepository;
+    private final TitlePublicQueryApi titlePublicQueryApi;
 
     public TitleAnalyticsResponse getTitleAnalytics(UUID titleId) {
         var averageRating = getAverageRatingForTitle(titleId);
@@ -51,6 +59,42 @@ public class AnalyticsService {
 
     public Long getTotalViewCount(UUID titleId) {
         return userInteractionRepository.countByTargetIdAndType(titleId, InteractionType.TITLE_VIEWED);
+    }
+
+    public List<WeeklyPopularTitleResponse> getTopWeeklyPopularTitles() {
+        var since = Instant.now().minus(WEEKLY_TOP_WINDOW);
+        var topViews = userInteractionRepository.findTopViewedTitlesSince(since, WEEKLY_TOP_LIMIT);
+
+        if (topViews.isEmpty()) {
+            return List.of();
+        }
+
+        var titleIds = topViews.stream()
+                .map(UserInteractionRepository.TopViewedTitleProjection::getTitleId)
+                .toList();
+        var titleInfoById = titlePublicQueryApi.getTitleShortInfoByIds(titleIds).stream()
+                .collect(Collectors.toMap(TitleShortInfo::id, titleInfo -> titleInfo));
+
+        var result = new ArrayList<WeeklyPopularTitleResponse>(WEEKLY_TOP_LIMIT);
+        var rank = 1;
+
+        for (var view : topViews) {
+            var title = titleInfoById.get(view.getTitleId());
+
+            if (title == null) {
+                continue;
+            }
+
+            result.add(new WeeklyPopularTitleResponse(
+                    view.getTitleId(),
+                    title.name(),
+                    title.slug(),
+                    view.getWeeklyViews(),
+                    rank++
+            ));
+        }
+
+        return result;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

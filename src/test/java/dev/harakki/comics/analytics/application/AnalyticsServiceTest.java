@@ -3,6 +3,8 @@ package dev.harakki.comics.analytics.application;
 import dev.harakki.comics.analytics.domain.InteractionType;
 import dev.harakki.comics.analytics.domain.UserInteraction;
 import dev.harakki.comics.analytics.infrastructure.UserInteractionRepository;
+import dev.harakki.comics.catalog.api.TitlePublicQueryApi;
+import dev.harakki.comics.catalog.api.TitleShortInfo;
 import dev.harakki.comics.catalog.api.TitleViewedEvent;
 import dev.harakki.comics.content.api.ChapterReadEvent;
 import dev.harakki.comics.library.api.LibraryAddTitleEvent;
@@ -15,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,6 +30,9 @@ class AnalyticsServiceTest {
 
     @Mock
     private UserInteractionRepository userInteractionRepository;
+
+    @Mock
+    private TitlePublicQueryApi titlePublicQueryApi;
 
     @InjectMocks
     private AnalyticsService analyticsService;
@@ -145,6 +151,64 @@ class AnalyticsServiceTest {
         assertThat(captor.getValue().getUserId()).isEqualTo(userId);
         assertThat(captor.getValue().getType()).isEqualTo(InteractionType.TITLE_ADDED_TO_LIBRARY);
         assertThat(captor.getValue().getTargetId()).isEqualTo(titleId);
+    }
+
+    @Test
+    void getTopWeeklyPopularTitles_whenDataExists_returnsEnrichedTopList() {
+        var title1 = UUID.randomUUID();
+        var title2 = UUID.randomUUID();
+
+        when(userInteractionRepository.findTopViewedTitlesSince(any(), org.mockito.ArgumentMatchers.anyInt())).thenReturn(List.of(
+                topViewed(title1, 20L),
+                topViewed(title2, 10L)
+        ));
+        when(titlePublicQueryApi.getTitleShortInfoByIds(List.of(title1, title2))).thenReturn(List.of(
+                new TitleShortInfo(title1, "Solo Leveling", "solo-leveling"),
+                new TitleShortInfo(title2, "One Piece", "one-piece")
+        ));
+
+        var result = analyticsService.getTopWeeklyPopularTitles();
+
+        assertThat(result).hasSize(2);
+        assertThat(result.getFirst().titleId()).isEqualTo(title1);
+        assertThat(result.getFirst().weeklyViews()).isEqualTo(20L);
+        assertThat(result.getFirst().rank()).isEqualTo(1);
+        assertThat(result.get(1).titleId()).isEqualTo(title2);
+        assertThat(result.get(1).rank()).isEqualTo(2);
+    }
+
+    @Test
+    void getTopWeeklyPopularTitles_whenTitleMissing_skipsItemAndReranks() {
+        var missingTitle = UUID.randomUUID();
+        var existingTitle = UUID.randomUUID();
+
+        when(userInteractionRepository.findTopViewedTitlesSince(any(), org.mockito.ArgumentMatchers.anyInt())).thenReturn(List.of(
+                topViewed(missingTitle, 50L),
+                topViewed(existingTitle, 40L)
+        ));
+        when(titlePublicQueryApi.getTitleShortInfoByIds(List.of(missingTitle, existingTitle))).thenReturn(List.of(
+                new TitleShortInfo(existingTitle, "Bleach", "bleach")
+        ));
+
+        var result = analyticsService.getTopWeeklyPopularTitles();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().titleId()).isEqualTo(existingTitle);
+        assertThat(result.getFirst().rank()).isEqualTo(1);
+    }
+
+    private static UserInteractionRepository.TopViewedTitleProjection topViewed(UUID titleId, long views) {
+        return new UserInteractionRepository.TopViewedTitleProjection() {
+            @Override
+            public UUID getTitleId() {
+                return titleId;
+            }
+
+            @Override
+            public Long getWeeklyViews() {
+                return views;
+            }
+        };
     }
 
 }
