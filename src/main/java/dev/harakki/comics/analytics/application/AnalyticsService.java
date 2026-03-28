@@ -1,6 +1,7 @@
 package dev.harakki.comics.analytics.application;
 
-import dev.harakki.comics.analytics.domain.InteractionType;
+import dev.harakki.comics.analytics.api.InteractionType;
+import dev.harakki.comics.analytics.api.UserInteractionApi;
 import dev.harakki.comics.analytics.domain.UserInteraction;
 import dev.harakki.comics.analytics.dto.TitleAnalyticsResponse;
 import dev.harakki.comics.analytics.dto.WeeklyPopularTitleResponse;
@@ -70,7 +71,7 @@ public class AnalyticsService {
         }
 
         var titleIds = topViews.stream()
-                .map(UserInteractionRepository.TopViewedTitleProjection::getTitleId)
+                .map(UserInteractionApi.TopViewedTitleProjection::getTitleId)
                 .toList();
         var titleInfoById = titlePublicQueryApi.getTitleShortInfoByIds(titleIds).stream()
                 .collect(Collectors.toMap(TitleShortInfo::id, titleInfo -> titleInfo));

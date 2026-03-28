@@ -2,6 +2,8 @@ package dev.harakki.comics.catalog.api;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public interface TitlePublicQueryApi {
@@ -12,5 +14,12 @@ public interface TitlePublicQueryApi {
      * @return List of {@link TitleShortInfo}
      */
     List<TitleShortInfo> getTitleShortInfoByIds(Collection<UUID> ids);
+
+    /**
+     * Get title tags map where key is title id and value is a set of tag ids.
+     * @param ids Collection of title unique identifiers
+     * @return Map titleId -> set(tagId)
+     */
+    Map<UUID, Set<UUID>> getTitleTagIdsByIds(Collection<UUID> ids);
 
 }

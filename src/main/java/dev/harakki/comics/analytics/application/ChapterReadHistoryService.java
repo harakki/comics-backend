@@ -1,6 +1,6 @@
 package dev.harakki.comics.analytics.application;
 
-import dev.harakki.comics.analytics.domain.InteractionType;
+import dev.harakki.comics.analytics.api.InteractionType;
 import dev.harakki.comics.analytics.infrastructure.UserInteractionRepository;
 import dev.harakki.comics.shared.api.ChapterReadHistoryProvider;
 import lombok.RequiredArgsConstructor;

@@ -46,15 +46,16 @@ C4 diagram of the application modules:
 
 The application is divided into the following Spring Modulith modules:
 
-| Module        | Package                          | Responsibility                                         |
-|---------------|----------------------------------|--------------------------------------------------------|
-| `catalog`     | `dev.harakki.comics.catalog`     | Titles (works), authors, publishers, and tags          |
-| `content`     | `dev.harakki.comics.content`     | Chapters, pages, user read history                     |
-| `library`     | `dev.harakki.comics.library`     | User personal library                                  |
-| `collections` | `dev.harakki.comics.collections` | User collections with privacy parameters               |
-| `analytics`   | `dev.harakki.comics.analytics`   | View and interaction statistics                        |
-| `media`       | `dev.harakki.comics.media`       | Media file management via S3 (MinIO)                   |
-| `shared`      | `dev.harakki.comics.shared`      | Shared utilities, exceptions, and application config   |
+| Module             | Package                               | Responsibility                                       |
+|--------------------|---------------------------------------|------------------------------------------------------|
+| `catalog`          | `dev.harakki.comics.catalog`          | Titles (works), authors, publishers, and tags        |
+| `content`          | `dev.harakki.comics.content`          | Chapters, pages, user read history                   |
+| `library`          | `dev.harakki.comics.library`          | User personal library                                |
+| `collections`      | `dev.harakki.comics.collections`      | User collections with privacy parameters             |
+| `analytics`        | `dev.harakki.comics.analytics`        | View and interaction statistics                      |
+| `recommendations`  | `dev.harakki.comics.recommendations`  | Personalized title recommendations                   |
+| `media`            | `dev.harakki.comics.media`            | Media file management via S3 (MinIO)                 |
+| `shared`           | `dev.harakki.comics.shared`           | Shared utilities, exceptions, and application config |
 
 ---
 
@@ -145,6 +146,12 @@ Interactive documentation is available at: [`http://localhost:8080/scalar/index.
 | Method | Path                                 | Access | Description                                          |
 |--------|--------------------------------------|--------|------------------------------------------------------|
 | `GET`  | `/api/v1/titles/{titleId}/analytics` | Public | Statistics of views/interactions with the title      |
+
+### Recommendations - `/api/v1/recommendations`
+
+| Method | Path                          | Access | Description                                 |
+|--------|-------------------------------|--------|---------------------------------------------|
+| `GET`  | `/api/v1/recommendations/me`  | USER   | Current user recommendations (personalized) |
 
 ### Media - `/api/v1/media`
 

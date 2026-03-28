@@ -1,4 +1,4 @@
-package dev.harakki.comics.analytics.domain;
+package dev.harakki.comics.analytics.api;
 
 public enum InteractionType {
     CHAPTER_READ,

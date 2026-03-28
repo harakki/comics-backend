@@ -1,6 +1,6 @@
 package dev.harakki.comics.analytics.application;
 
-import dev.harakki.comics.analytics.domain.InteractionType;
+import dev.harakki.comics.analytics.api.InteractionType;
 import dev.harakki.comics.analytics.infrastructure.UserInteractionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,6 +1,7 @@
 package dev.harakki.comics.analytics.application;
 
-import dev.harakki.comics.analytics.domain.InteractionType;
+import dev.harakki.comics.analytics.api.InteractionType;
+import dev.harakki.comics.analytics.api.UserInteractionApi;
 import dev.harakki.comics.analytics.domain.UserInteraction;
 import dev.harakki.comics.analytics.infrastructure.UserInteractionRepository;
 import dev.harakki.comics.catalog.api.TitlePublicQueryApi;
@@ -197,8 +198,8 @@ class AnalyticsServiceTest {
         assertThat(result.getFirst().rank()).isEqualTo(1);
     }
 
-    private static UserInteractionRepository.TopViewedTitleProjection topViewed(UUID titleId, long views) {
-        return new UserInteractionRepository.TopViewedTitleProjection() {
+    private static UserInteractionApi.TopViewedTitleProjection topViewed(UUID titleId, long views) {
+        return new UserInteractionApi.TopViewedTitleProjection() {
             @Override
             public UUID getTitleId() {
                 return titleId;
