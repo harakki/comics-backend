@@ -40,6 +40,10 @@ Backend for the diploma project "Development of a web service for reading graphi
 
 ## Architecture
 
+C4 diagram of the application modules:
+
+![C4 diagram](misc/images/c4-modules-diagram.png)
+
 The application is divided into the following Spring Modulith modules:
 
 | Module        | Package                          | Responsibility                                         |
