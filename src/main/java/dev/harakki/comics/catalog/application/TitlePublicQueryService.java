@@ -30,7 +30,7 @@ public class TitlePublicQueryService implements TitlePublicQueryApi {
         }
 
         return titleRepository.findAllById(ids).stream()
-                .map(title -> new TitleShortInfo(title.getId(), title.getName(), title.getSlug()))
+                .map(title -> new TitleShortInfo(title.getId(), title.getName(), title.getMainCoverMediaId(), title.getSlug()))
                 .toList();
     }
 

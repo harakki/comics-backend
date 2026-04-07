@@ -6,6 +6,7 @@ import java.util.UUID;
 public record PersonalRecommendationResponse(
         UUID titleId,
         String name,
+        UUID mainCoverMediaId,
         String slug,
         double score,
         String reason
