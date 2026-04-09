@@ -88,6 +88,7 @@ public class AnalyticsService {
 
             result.add(new WeeklyPopularTitleResponse(
                     view.getTitleId(),
+                    title.mainCoverMediaId(),
                     title.name(),
                     title.slug(),
                     view.getWeeklyViews(),

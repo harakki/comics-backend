@@ -11,6 +11,9 @@ public record WeeklyPopularTitleResponse(
         @Schema(description = "Title unique identifier", example = "019b9d1e-bc3a-70f3-8520-36e8d82dc9e0")
         UUID titleId,
 
+        @Schema(description = "Main cover media unique identifier", example = "019b9d1e-bc3a-70f3-8520-36e8d82dc9e0")
+        UUID mainCoverMediaId,
+
         @Schema(description = "Title name", example = "Chainsaw Man")
         String name,
 
