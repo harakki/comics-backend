@@ -19,6 +19,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,9 +43,9 @@ class RecommendationsServiceTest {
         var top7dB = UUID.randomUUID();
         var top30d = UUID.randomUUID();
         var allTitles = Map.of(
-                top7dA, new TitleShortInfo(top7dA, "Top 7d A", "top-7d-a"),
-                top7dB, new TitleShortInfo(top7dB, "Top 7d B", "top-7d-b"),
-                top30d, new TitleShortInfo(top30d, "Top 30d", "top-30d")
+                top7dA, new TitleShortInfo(top7dA, "Top 7d A", null, "top-7d-a"),
+                top7dB, new TitleShortInfo(top7dB, "Top 7d B", null, "top-7d-b"),
+                top30d, new TitleShortInfo(top30d, "Top 30d", null, "top-30d")
         );
 
         when(userInteractionApi.findRecentTargetIds(org.mockito.ArgumentMatchers.eq(userId), org.mockito.ArgumentMatchers.eq(InteractionType.TITLE_VIEWED), any()))
@@ -79,14 +80,6 @@ class RecommendationsServiceTest {
                 .thenReturn(List.of(topViewed(onlyTitle, 10L)))
                 .thenReturn(List.of())
                 .thenReturn(List.of());
-        when(titlePublicQueryApi.getTitleShortInfoByIds(any()))
-                .thenAnswer(invocation -> {
-                    Collection<UUID> ids = invocation.getArgument(0);
-                    if (ids.contains(onlyTitle)) {
-                        return List.of(new TitleShortInfo(onlyTitle, "Only", "only"));
-                    }
-                    return List.of();
-                });
 
         var result = recommendationsService.getPersonalRecommendations(userId, 10);
 
@@ -106,24 +99,29 @@ class RecommendationsServiceTest {
 
         when(userInteractionApi.findRecentTargetIds(org.mockito.ArgumentMatchers.eq(userId), org.mockito.ArgumentMatchers.eq(InteractionType.TITLE_VIEWED), any()))
                 .thenReturn(List.of(viewedRecent, viewedOld, viewedRecent));
-        when(titlePublicQueryApi.getTitleTagIdsByIds(List.of(viewedRecent, viewedOld))).thenReturn(Map.of(
-                viewedRecent, java.util.Set.of(tagA),
-                viewedOld, java.util.Set.of(tagB)
-        ));
+        when(titlePublicQueryApi.getTitleTagIdsByIds(any())).thenAnswer(invocation -> {
+            Collection<UUID> ids = invocation.getArgument(0);
+            if (ids.contains(viewedRecent) && ids.contains(viewedOld) && ids.size() == 2) {
+                return Map.of(
+                        viewedRecent, java.util.Set.of(tagA),
+                        viewedOld, java.util.Set.of(tagB)
+                );
+            }
+            return Map.of(
+                    candidateHighScore, java.util.Set.of(tagA, tagB),
+                    candidateTieA, java.util.Set.of(tagB),
+                    candidateTieB, java.util.Set.of(tagB)
+            );
+        });
         when(userInteractionApi.findRecommendedTitleIdsBySharedTags(
-                List.of(viewedRecent, viewedOld),
-                List.of(viewedRecent, viewedOld),
-                9
+                eq(List.of(viewedRecent, viewedOld)),
+                any(),
+                eq(9)
         )).thenReturn(List.of(candidateTieB, viewedRecent, candidateHighScore, candidateTieA));
-        when(titlePublicQueryApi.getTitleTagIdsByIds(List.of(candidateTieB, viewedRecent, candidateHighScore, candidateTieA))).thenReturn(Map.of(
-                candidateHighScore, java.util.Set.of(tagA, tagB),
-                candidateTieA, java.util.Set.of(tagB),
-                candidateTieB, java.util.Set.of(tagB)
-        ));
-        when(titlePublicQueryApi.getTitleShortInfoByIds(List.of(candidateHighScore, candidateTieA, candidateTieB))).thenReturn(List.of(
-                new TitleShortInfo(candidateHighScore, "High", "high"),
-                new TitleShortInfo(candidateTieA, "Tie A", "tie-a"),
-                new TitleShortInfo(candidateTieB, "Tie B", "tie-b")
+        when(titlePublicQueryApi.getTitleShortInfoByIds(any())).thenReturn(List.of(
+                new TitleShortInfo(candidateHighScore, "High",null, "high"),
+                new TitleShortInfo(candidateTieA, "Tie A",null,  "tie-a"),
+                new TitleShortInfo(candidateTieB, "Tie B", null, "tie-b")
         ));
 
         var result = recommendationsService.getPersonalRecommendations(userId, 3);

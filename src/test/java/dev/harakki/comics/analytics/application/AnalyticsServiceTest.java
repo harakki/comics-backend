@@ -164,8 +164,8 @@ class AnalyticsServiceTest {
                 topViewed(title2, 10L)
         ));
         when(titlePublicQueryApi.getTitleShortInfoByIds(List.of(title1, title2))).thenReturn(List.of(
-                new TitleShortInfo(title1, "Solo Leveling", "solo-leveling"),
-                new TitleShortInfo(title2, "One Piece", "one-piece")
+                new TitleShortInfo(title1, "Solo Leveling", null, "solo-leveling"),
+                new TitleShortInfo(title2, "One Piece", null, "one-piece")
         ));
 
         var result = analyticsService.getTopWeeklyPopularTitles();
@@ -188,7 +188,7 @@ class AnalyticsServiceTest {
                 topViewed(existingTitle, 40L)
         ));
         when(titlePublicQueryApi.getTitleShortInfoByIds(List.of(missingTitle, existingTitle))).thenReturn(List.of(
-                new TitleShortInfo(existingTitle, "Bleach", "bleach")
+                new TitleShortInfo(existingTitle, "Bleach", null, "bleach")
         ));
 
         var result = analyticsService.getTopWeeklyPopularTitles();
