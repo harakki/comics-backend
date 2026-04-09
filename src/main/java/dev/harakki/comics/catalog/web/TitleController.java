@@ -15,6 +15,7 @@ import net.kaczmarzyk.spring.data.jpa.web.annotation.Or;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.Spec;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -53,7 +54,7 @@ class TitleController implements TitleApi {
                     @Spec(path = Title_.CONTENT_RATING, params = "contentRating", spec = LessThanOrEqual.class),
                     @Spec(path = "t.id", params = "tags", spec = In.class)
             }) Specification<Title> filterSpec,
-            @PageableDefault(sort = Title_.NAME) Pageable pageable
+            @PageableDefault(sort = {Title_.UPDATED_AT, Title_.CREATED_AT}, direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Specification<Title> spec = Specification.where(searchSpec).and(filterSpec);
         return titleService.getAll(spec, pageable);

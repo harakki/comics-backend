@@ -115,6 +115,29 @@ class TitleE2ETest extends BaseIntegrationTest {
     }
 
     @Test
+    void getTitles_defaultsToNewestByUpdatedThenCreated() throws Exception {
+        String searchToken = UUID.randomUUID().toString().substring(0, 8);
+        String olderName = "Sort Old " + searchToken;
+        String newerName = "Sort New " + searchToken;
+
+        String olderId = createTitleAndGetId(olderName);
+        String newerId = createTitleAndGetId(newerName);
+
+        mockMvc.perform(patch("/api/v1/titles/{id}", olderId)
+                        .with(adminJwt())
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(jsonMapper.writeValueAsString(Map.of("titleStatus", "COMPLETED"))))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/titles").param("search", searchToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(olderId))
+                .andExpect(jsonPath("$.content[0].name").value(olderName))
+                .andExpect(jsonPath("$.content[1].id").value(newerId))
+                .andExpect(jsonPath("$.content[1].name").value(newerName));
+    }
+
+    @Test
     void getTitles_withTagIdFilter_returnsMatchingTitles() throws Exception {
         String tagSlug = "genre-" + UUID.randomUUID().toString().substring(0, 8);
         String tagId = createTagAndGetId("Genre " + tagSlug, tagSlug);
