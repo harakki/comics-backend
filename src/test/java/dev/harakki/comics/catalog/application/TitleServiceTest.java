@@ -201,18 +201,18 @@ class TitleServiceTest {
                 .titleStatus(TitleStatus.ONGOING)
                 .contentRating(ContentRating.SIX_PLUS)
                 .countryIsoCode("JP")
-                .publisherId(publisherId)
+                .publisherIds(List.of(publisherId))
                 .build();
         var title = buildMinimalTitle(null);
 
         when(titleRepository.existsByName("One Piece")).thenReturn(false);
         when(titleMapper.toEntity(request)).thenReturn(title);
         when(slugGenerator.generate(eq("One Piece"), any())).thenReturn("one-piece");
-        when(publisherRepository.findById(publisherId)).thenReturn(Optional.empty());
+        when(publisherRepository.findAllById(Set.of(publisherId))).thenReturn(List.of());
 
         assertThatThrownBy(() -> titleService.create(request))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining(publisherId.toString());
+                .hasMessageContaining("publishers");
     }
 
     @Test

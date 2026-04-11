@@ -7,6 +7,7 @@ import dev.harakki.comics.catalog.domain.TitleType;
 import lombok.Builder;
 
 import java.time.Year;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -23,7 +24,7 @@ public record TitleUpdateRequest(
         String countryIsoCode,
         UUID mainCoverMediaId,
         Map<UUID, AuthorRole> authorIds,
-        UUID publisherId,
+        List<UUID> publisherIds,
         Set<UUID> tagIds
 ) {
 }

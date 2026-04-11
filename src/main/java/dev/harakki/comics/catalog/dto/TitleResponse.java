@@ -26,7 +26,7 @@ public record TitleResponse(
         String countryIsoCode,
         UUID mainCoverMediaId,
         List<TitleAuthorResponse> authors,
-        PublisherResponse publisher,
+        List<TitlePublisherResponse> publishers,
         Set<TagResponse> tags
 ) implements Serializable {
 }

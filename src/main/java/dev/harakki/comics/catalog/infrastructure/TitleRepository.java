@@ -20,20 +20,20 @@ public interface TitleRepository extends JpaRepository<Title, UUID>, JpaSpecific
 
     @Override
     @NonNull
-    @EntityGraph(attributePaths = {"authors", "authors.author", "tags", "publisher"})
+    @EntityGraph(attributePaths = {"authors", "authors.author", "tags"})
     Page<Title> findAll(@NonNull Pageable pageable);
 
     @Override
     @NonNull
-    @EntityGraph(attributePaths = {"authors", "authors.author", "tags", "publisher"})
+    @EntityGraph(attributePaths = {"authors", "authors.author", "tags"})
     Page<Title> findAll(@Nullable Specification<Title> spec, @NonNull Pageable pageable);
 
     @Override
     @NonNull
-    @EntityGraph(attributePaths = {"authors", "authors.author", "tags", "publisher"})
+    @EntityGraph(attributePaths = {"authors", "authors.author", "tags", "publishers", "publishers.publisher"})
     Optional<Title> findById(@NonNull UUID id);
 
-    @EntityGraph(attributePaths = {"authors", "authors.author", "tags", "publisher"})
+    @EntityGraph(attributePaths = {"authors", "authors.author", "tags", "publishers", "publishers.publisher"})
     Optional<Title> findBySlug(String slug);
 
     boolean existsByName(@NotBlank String name);

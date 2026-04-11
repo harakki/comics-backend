@@ -25,8 +25,7 @@ import java.util.*;
 @Table(name = "titles", indexes = {
         @Index(name = "idx_title_created_at", columnList = "createdAt"),
         @Index(name = "idx_title_release_year", columnList = "releaseYear"),
-        @Index(name = "idx_title_status", columnList = "titleStatus"),
-        @Index(name = "idx_title_publisher", columnList = "publisher_id")
+        @Index(name = "idx_title_status", columnList = "titleStatus")
 })
 @EntityListeners(AuditingEntityListener.class)
 public class Title {
@@ -74,9 +73,10 @@ public class Title {
     @OneToMany(mappedBy = "title", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TitleAuthor> authors = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "publisher_id")
-    private Publisher publisher;
+    @Builder.Default
+    @OrderBy("sortOrder ASC")
+    @OneToMany(mappedBy = "title", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TitlePublisher> publishers = new ArrayList<>();
 
     @Builder.Default
     @ManyToMany

@@ -4,10 +4,7 @@ import dev.harakki.comics.catalog.api.TitleCreatedEvent;
 import dev.harakki.comics.catalog.api.TitleDeletedEvent;
 import dev.harakki.comics.catalog.api.TitleUpdatedEvent;
 import dev.harakki.comics.catalog.api.TitleViewedEvent;
-import dev.harakki.comics.catalog.domain.Author;
-import dev.harakki.comics.catalog.domain.Tag;
-import dev.harakki.comics.catalog.domain.Title;
-import dev.harakki.comics.catalog.domain.TitleAuthor;
+import dev.harakki.comics.catalog.domain.*;
 import dev.harakki.comics.catalog.dto.TitleCreateRequest;
 import dev.harakki.comics.catalog.dto.TitleResponse;
 import dev.harakki.comics.catalog.dto.TitleUpdateRequest;
@@ -30,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Validated
@@ -101,10 +99,26 @@ public class TitleService {
         }
 
         // Process connection with publisher
-        if (request.publisherId() != null) {
-            var publisher = publisherRepository.findById(request.publisherId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Publisher with id " + request.publisherId() + " not found"));
-            title.setPublisher(publisher);
+        if (request.publisherIds() != null && !request.publisherIds().isEmpty()) {
+            Set<UUID> publisherIds = new HashSet<>(request.publisherIds());
+
+            List<Publisher> publishers = publisherRepository.findAllById(publisherIds);
+            if (publishers.size() != publisherIds.size()) {
+                throw new ResourceNotFoundException("One or more publishers not found");
+            }
+
+            int sortOrder = 0;
+
+            for (var publisher : publishers) {
+                var titlePublisher = TitlePublisher.builder()
+                        .title(title) // Bind to title
+                        .publisher(publisher) // Bind to publisher
+                        .sortOrder(sortOrder++) // 0, 1, 2, ...
+                        .build();
+
+                // Add to title's collection
+                title.getPublishers().add(titlePublisher);
+            }
         }
 
         // Process connection with tags
@@ -200,10 +214,27 @@ public class TitleService {
         }
 
         // Process connection with publisher
-        if (request.publisherId() != null) {
-            var publisher = publisherRepository.findById(request.publisherId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Publisher with id " + request.publisherId() + " not found"));
-            title.setPublisher(publisher);
+        if (request.publisherIds() != null) {
+            Set<UUID> publisherId = new HashSet<>(request.publisherIds());
+            title.getPublishers().clear();
+
+            List<Publisher> publishers = publisherRepository.findAllById(publisherId);
+            if (publishers.size() != publisherId.size()) {
+                throw new ResourceNotFoundException("One or more authors not found");
+            }
+
+            int sortOrder = 0;
+
+            for (var publisher : publishers) {
+                var titlePublisher = TitlePublisher.builder()
+                        .title(title) // Bind to title
+                        .publisher(publisher) // Bind to publisher
+                        .sortOrder(sortOrder++) // 0, 1, 2, ...
+                        .build();
+
+                // Add to title's collection
+                title.getPublishers().add(titlePublisher);
+            }
         }
 
         // Process connection with tags
