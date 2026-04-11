@@ -38,8 +38,8 @@ public interface PublisherApi {
             operationId = "searchPublishers",
             summary = "Search and filter publishers"
     )
-    @Parameter(name = "search", description = "Search by name or slug", example = "shueisha")
-    @Parameter(name = "country", description = "Filter by Country ISO Code", example = "JP")
+    @Parameter(name = "search", description = "Search by name or slug", schema = @Schema(type = "string", example = "shueisha"))
+    @Parameter(name = "country", description = "Filter by Country ISO Code", schema = @Schema(type = "string", example = "JP"))
     @ApiResponse(responseCode = "200", description = "Page of publishers")
     @ApiResponse(responseCode = "400", ref = "BadRequest")
     Page<PublisherResponse> getPublishers(

@@ -38,8 +38,8 @@ public interface AuthorApi {
     )
     @ApiResponse(responseCode = "200", description = "Page of authors")
     @ApiResponse(responseCode = "400", ref = "BadRequest")
-    @Parameter(name = "search", description = "Search by name or slug", example = "fujimoto")
-    @Parameter(name = "country", description = "Filter by Country ISO Code", example = "JP")
+    @Parameter(name = "search", description = "Search by name or slug", schema = @Schema(type = "string", example = "fujimoto"))
+    @Parameter(name = "country", description = "Filter by Country ISO Code", schema = @Schema(type = "string", example = "JP"))
     Page<AuthorResponse> getAuthors(@Parameter(hidden = true) Specification<Author> searchSpec,
                                     @Parameter(hidden = true) Specification<Author> filterSpec,
                                     @ParameterObject Pageable pageable);
