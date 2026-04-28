@@ -42,6 +42,8 @@ public interface TitleApi {
     @Parameter(name = "type", description = "Filter by type", schema = @Schema(type = "string", example = "MANGA"))
     @Parameter(name = "titleStatus", description = "Filter by status", schema = @Schema(type = "string", example = "COMPLETED"))
     @Parameter(name = "country", description = "Filter by Country ISO Code", schema = @Schema(type = "string", example = "JP"))
+    @Parameter(name = "authorId", description = "Filter by author UUID", schema = @Schema(type = "string", example = "0195a69f-0c3e-7ca5-adf0-44ec2e4b5d1a"))
+    @Parameter(name = "publisherId", description = "Filter by publisher UUID", schema = @Schema(type = "string", example = "0195a69f-0c3e-7ca5-adf0-44ec2e4b5d1a"))
     @Parameter(name = "tags", description = "Filter by tag UUIDs", schema = @Schema(type = "string", example = "0195a69f-0c3e-7ca5-adf0-44ec2e4b5d1a"))
     @Parameter(name = "releaseYear", description = "Release year", schema = @Schema(type = "number", example = "2018"))
     @Parameter(name = "yearFrom", description = "Min release year", schema = @Schema(type = "number", example = "2000"))

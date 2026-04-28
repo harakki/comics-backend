@@ -2,11 +2,9 @@ package dev.harakki.comics.catalog.web;
 
 import dev.harakki.comics.catalog.application.TitleService;
 import dev.harakki.comics.catalog.domain.Title;
-import dev.harakki.comics.catalog.domain.Title_;
 import dev.harakki.comics.catalog.dto.TitleCreateRequest;
 import dev.harakki.comics.catalog.dto.TitleResponse;
 import dev.harakki.comics.catalog.dto.TitleUpdateRequest;
-import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import net.kaczmarzyk.spring.data.jpa.domain.*;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
@@ -40,21 +38,25 @@ class TitleController implements TitleApi {
     @GetMapping
     public Page<TitleResponse> getTitles(
             @Or({
-                    @Spec(path = Title_.NAME, params = "search", spec = LikeIgnoreCase.class),
-                    @Spec(path = Title_.SLUG, params = "search", spec = LikeIgnoreCase.class)
+                    @Spec(path = "name", params = "search", spec = LikeIgnoreCase.class),
+                    @Spec(path = "slug", params = "search", spec = LikeIgnoreCase.class)
             }) Specification<Title> searchSpec,
-            @Join(path = Title_.TAGS, alias = "t", type = JoinType.LEFT)
+            @Join(path = "authors", alias = "a")
+            @Join(path = "publishers", alias = "p")
+            @Join(path = "tags", alias = "t")
             @And({
-                    @Spec(path = Title_.TYPE, spec = In.class),
-                    @Spec(path = Title_.TITLE_STATUS, spec = In.class),
-                    @Spec(path = Title_.COUNTRY_ISO_CODE, params = "country", spec = Equal.class),
-                    @Spec(path = Title_.RELEASE_YEAR, params = "releaseYear", spec = Equal.class),
-                    @Spec(path = Title_.RELEASE_YEAR, params = "yearFrom", spec = GreaterThanOrEqual.class),
-                    @Spec(path = Title_.RELEASE_YEAR, params = "yearTo", spec = LessThanOrEqual.class),
-                    @Spec(path = Title_.CONTENT_RATING, params = "contentRating", spec = LessThanOrEqual.class),
+                    @Spec(path = "type", spec = In.class),
+                    @Spec(path = "titleStatus", spec = In.class),
+                    @Spec(path = "countryIsoCode", params = "country", spec = Equal.class),
+                    @Spec(path = "releaseYear", params = "releaseYear", spec = Equal.class),
+                    @Spec(path = "releaseYear", params = "yearFrom", spec = GreaterThanOrEqual.class),
+                    @Spec(path = "releaseYear", params = "yearTo", spec = LessThanOrEqual.class),
+                    @Spec(path = "contentRating", params = "contentRating", spec = LessThanOrEqual.class),
+                    @Spec(path = "a.author.id", params = "authorId", spec = Equal.class),
+                    @Spec(path = "p.publisher.id", params = "publisherId", spec = Equal.class),
                     @Spec(path = "t.id", params = "tags", spec = In.class)
             }) Specification<Title> filterSpec,
-            @PageableDefault(sort = {Title_.UPDATED_AT, Title_.CREATED_AT}, direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Specification<Title> spec = Specification.where(searchSpec).and(filterSpec);
         return titleService.getAll(spec, pageable);
