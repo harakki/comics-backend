@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -20,10 +21,16 @@ public class RecommendationsController implements RecommendationsApi {
 
     private final RecommendationsService recommendationsService;
 
+    @Override
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/recommendations/me")
     public List<PersonalRecommendationResponse> getMyRecommendations(@RequestParam(required = false) Integer limit) {
         return recommendationsService.getPersonalRecommendations(SecurityUtils.getCurrentUserId(), (limit == null) ? 10 : limit);
+    }
+
+    @Override
+    public List<PersonalRecommendationResponse> getSimilarTitles(UUID titleId, Integer limit) {
+        return recommendationsService.getSimilarTitles(titleId, (limit == null) ? 10 : limit);
     }
 
 }
