@@ -2,7 +2,8 @@
         allowedDependencies = {
                 "shared",
                 "catalog :: api",
-                "analytics :: api"
+                "analytics :: api",
+                "library :: api"
         }
 )
 package dev.harakki.comics.recommendations;

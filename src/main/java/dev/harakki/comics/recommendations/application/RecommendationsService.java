@@ -4,7 +4,10 @@ import dev.harakki.comics.analytics.api.InteractionType;
 import dev.harakki.comics.analytics.api.UserInteractionApi;
 import dev.harakki.comics.catalog.api.TitlePublicQueryApi;
 import dev.harakki.comics.catalog.api.TitleShortInfo;
+import dev.harakki.comics.recommendations.api.RecommendationsApi;
 import dev.harakki.comics.recommendations.dto.PersonalRecommendationResponse;
+import dev.harakki.comics.recommendations.repository.SimilarTitlesRepository;
+import dev.harakki.comics.recommendations.repository.UserTagProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -23,207 +26,187 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class RecommendationsService {
 
-    private static final int MAX_RECOMMENDATIONS_LIMIT = 20;
-    private static final int RECENT_HISTORY_LIMIT = 20;
-    private static final int MIN_RECOMMENDATIONS_REQUIRED = 3;
-    private static final double RECENT_ACTIVITY_BONUS = 0.5;
+    private static final int MAX_LIMIT = 20;
+    private static final int MIN_REQUIRED = 3;
+    private static final int CANDIDATE_MULTIPLIER = 3;
+    private static final double ALPHA_CONTENT = 0.75;
+    private static final double BETA_COLLAB = 0.25;
 
-    private static final List<FallbackWindow> POPULARITY_WINDOWS = List.of(
-            new FallbackWindow(Duration.ofDays(7), "popular_7d"),
-            new FallbackWindow(Duration.ofDays(30), "popular_30d"),
-            new FallbackWindow(Duration.ofDays(90), "popular_90d")
+    private static final List<Duration> FALLBACK_WINDOWS = List.of(
+            Duration.ofDays(7),
+            Duration.ofDays(30),
+            Duration.ofDays(90)
     );
 
-    private final TitlePublicQueryApi titlePublicQueryApi;
-    private final UserInteractionApi userInteractionRepository;
-
-    private static int countOverlap(Set<UUID> left, Set<UUID> right) {
-        Set<UUID> smaller = left.size() < right.size() ? left : right;
-        Set<UUID> larger = left.size() < right.size() ? right : left;
-
-        int overlap = 0;
-        for (var tagId : smaller) {
-            if (larger.contains(tagId)) {
-                overlap++;
-            }
-        }
-        return overlap;
-    }
+    private final SimilarTitlesRepository similarTitlesRepository;
+    private final UserTagProfileRepository profileRepository;
+    private final UserInteractionApi userInteractionApi;
+    private final TitlePublicQueryApi titleApi;
 
     public List<PersonalRecommendationResponse> getPersonalRecommendations(UUID userId, int limit) {
-        var normalizedLimit = Math.clamp(limit, 1, MAX_RECOMMENDATIONS_LIMIT);
+        int normalizedLimit = Math.clamp(limit, 1, MAX_LIMIT);
 
-        var viewedTitleIds = getRecentViewedTitleIds(userId);
-        var excludedTitleIds = new HashSet<>(viewedTitleIds);
+        var excluded = buildExclusionSet(userId);
+        var likedTitleIds = getLikedTitleIds(userId);
 
-        // Получить персонализированные рекомендации
-        List<ScoredRecommendation> recommendations = new ArrayList<>(
-                getPersonalizedRecommendations(viewedTitleIds, excludedTitleIds, normalizedLimit)
+        var candidates = mergeCandidates(
+                fetchContentCandidates(userId, excluded, normalizedLimit),
+                fetchCollabCandidates(userId, likedTitleIds, excluded, normalizedLimit)
         );
 
-        boolean hasPersonalized = !recommendations.isEmpty();
+        boolean hasPersonalized = !candidates.isEmpty();
 
-        // Если не хватает рекомендаций, то добить популярными
-        if (recommendations.size() < normalizedLimit) {
-            // Добавить персонализированные в исключения, чтобы не дублировать в фоллбеках
-            recommendations.forEach(r -> excludedTitleIds.add(r.titleId()));
-
-            recommendations.addAll(getPopularFallbackRecommendations(
-                    excludedTitleIds,
-                    normalizedLimit - recommendations.size()
-            ));
+        if (candidates.size() < normalizedLimit) {
+            candidates.addAll(fetchPopularFallback(excluded, normalizedLimit - candidates.size()));
         }
 
-        // Проверка на холодный старт
-        if (!hasPersonalized && recommendations.size() < Math.min(normalizedLimit, MIN_RECOMMENDATIONS_REQUIRED)) {
+        if (!hasPersonalized && candidates.size() < Math.min(normalizedLimit, MIN_REQUIRED)) {
             return Collections.emptyList();
         }
 
-        // Наполнить данными о тайтлах
-        return enrichWithTitleInfo(recommendations);
+        return enrich(candidates, normalizedLimit);
     }
 
-    private List<ScoredRecommendation> getPersonalizedRecommendations(List<UUID> viewedTitleIds,
-                                                                      Set<UUID> excludedTitleIds,
-                                                                      int limit) {
-        if (viewedTitleIds.isEmpty()) {
-            return Collections.emptyList();
-        }
+    private Set<UUID> buildExclusionSet(UUID userId) {
+        var excluded = new HashSet<UUID>();
+        excluded.addAll(getRecentViewedIds(userId));
+        excluded.addAll(getDislikedIds(userId));
+        return excluded;
+    }
 
-        var tagIdsOfViewedTitles = titlePublicQueryApi.getTitleTagIdsByIds(viewedTitleIds);
-        var seedTitleIds = viewedTitleIds.stream()
-                .filter(titleId -> !tagIdsOfViewedTitles.getOrDefault(titleId, Collections.emptySet()).isEmpty())
-                .toList();
+    private List<UUID> getRecentViewedIds(UUID userId) {
+        return userInteractionApi
+                .findRecentTargetIds(userId, InteractionType.TITLE_VIEWED, PageRequest.of(0, 60))
+                .stream().distinct().limit(20).toList();
+    }
 
-        if (seedTitleIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // Найди тайтлы с похожими тегами, но НЕ из черного списка
-        var candidateIds = userInteractionRepository.findRecommendedTitleIdsBySharedTags(
-                seedTitleIds,
-                new ArrayList<>(excludedTitleIds),
-                limit * 3
-        );
-
-        if (candidateIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // Все теги, которые нравятся пользователю
-        var seedTagIds = seedTitleIds.stream()
-                .flatMap(titleId -> tagIdsOfViewedTitles.getOrDefault(titleId, Collections.emptySet()).stream())
+    private Set<UUID> getDislikedIds(UUID userId) {
+        return userInteractionApi.findRecentVotesByUser(userId, 60).stream()
+                .filter(v -> "DISLIKE".equalsIgnoreCase(v.getVoteType()))
+                .map(UserInteractionApi.UserVoteProjection::getTargetId)
                 .collect(Collectors.toSet());
+    }
 
-        var mostRecentTagIds = tagIdsOfViewedTitles.getOrDefault(seedTitleIds.getFirst(), Collections.emptySet());
-        var candidateTagIds = titlePublicQueryApi.getTitleTagIdsByIds(candidateIds);
+    private List<UUID> getLikedTitleIds(UUID userId) {
+        return userInteractionApi.findRecentVotesByUser(userId, 60).stream()
+                .filter(v -> "LIKE".equalsIgnoreCase(v.getVoteType()))
+                .map(UserInteractionApi.UserVoteProjection::getTargetId)
+                .toList();
+    }
 
-        return candidateIds.stream()
-                .filter(candidateId -> !excludedTitleIds.contains(candidateId))
-                .map(candidateId -> scoreCandidate(
-                                candidateId,
-                                candidateTagIds.getOrDefault(candidateId, Collections.emptySet()),
-                                seedTagIds,
-                                mostRecentTagIds
-                        )
+    private List<ScoredCandidate> fetchContentCandidates(UUID userId,
+                                                         Set<UUID> excluded,
+                                                         int limit) {
+        return profileRepository
+                .findContentCandidates(userId, new ArrayList<>(excluded), limit * CANDIDATE_MULTIPLIER)
+                .stream()
+                .map(p -> new ScoredCandidate(p.getTitleId(), p.getScore(), 0.0, p.getReason()))
+                .toList();
+    }
+
+    private List<ScoredCandidate> fetchCollabCandidates(UUID userId,
+                                                        List<UUID> likedTitleIds,
+                                                        Set<UUID> excluded,
+                                                        int limit) {
+        if (likedTitleIds.isEmpty()) return Collections.emptyList();
+
+        var raw = userInteractionApi.findCollabCandidates(
+                userId, likedTitleIds, new ArrayList<>(excluded), limit * CANDIDATE_MULTIPLIER);
+        double max = raw.stream().mapToDouble(RecommendationsApi.ScoredTitleProjection::getScore).max().orElse(1.0);
+
+        return raw.stream()
+                .map(p -> new ScoredCandidate(p.getTitleId(), 0.0, p.getScore() / max, p.getReason()))
+                .toList();
+    }
+
+    private List<ScoredCandidate> fetchPopularFallback(Set<UUID> excluded, int limit) {
+        for (var window : FALLBACK_WINDOWS) {
+            var result = userInteractionApi.findPopularSince(
+                    Instant.now().minus(window), new ArrayList<>(excluded), limit);
+            if (!result.isEmpty()) {
+                return result.stream()
+                        .map(p -> new ScoredCandidate(p.getTitleId(), 0.0, 0.0, p.getReason()))
+                        .collect(Collectors.toCollection(ArrayList::new));
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    // Объединяет content и collab сигналы.
+    // Для тайтлов из обоих источников суммирует сигналы и помечает как "hybrid".
+    // final_score = α * content_score + β * collab_score
+    private ArrayList<ScoredCandidate> mergeCandidates(List<ScoredCandidate> content,
+                                                       List<ScoredCandidate> collab) {
+        Map<UUID, ScoredCandidate> merged = new LinkedHashMap<>();
+
+        content.forEach(c -> merged.put(c.titleId(), c));
+        collab.forEach(c -> merged.merge(c.titleId(), c,
+                (existing, incoming) -> new ScoredCandidate(
+                        existing.titleId(), existing.contentScore(), incoming.collabScore(), "hybrid"
                 )
-                .filter(Objects::nonNull)
-                // Сортировка по максимальному баллу и ID
-                .sorted(Comparator.comparingDouble(ScoredRecommendation::score).reversed()
-                        .thenComparing(ScoredRecommendation::titleId))
-                .limit(limit)
-                .toList();
+        ));
+
+        return merged.values().stream()
+                .map(c -> c.withFinalScore(ALPHA_CONTENT * c.contentScore() + BETA_COLLAB * c.collabScore()))
+                .sorted(Comparator.comparingDouble(ScoredCandidate::finalScore).reversed())
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private ScoredRecommendation scoreCandidate(UUID candidateId,
-                                                Set<UUID> candidateTags,
-                                                Set<UUID> seedTags,
-                                                Set<UUID> recentTags) {
-        // Количество общих тегов у кандидата и всей истории пользователя
-        int overlap = countOverlap(candidateTags, seedTags);
-        if (overlap == 0) {
-            return null;
-        }
-
-        boolean hasRecentOverlap = !Collections.disjoint(candidateTags, recentTags);
-        // 1 общий тег = 1 балл. Плюс бонус 0.5, если похоже на последнее прочитанное
-        double score = overlap + (hasRecentOverlap ? RECENT_ACTIVITY_BONUS : 0.0);
-
-        return new ScoredRecommendation(candidateId, score, "tag_overlap");
-    }
-
-    private List<ScoredRecommendation> getPopularFallbackRecommendations(Set<UUID> excludedTitleIds, int limit) {
-        if (limit <= 0) {
-            return Collections.emptyList();
-        }
-
-        List<ScoredRecommendation> fallbacks = new ArrayList<>();
-        Instant now = Instant.now();
-
-        for (var window : POPULARITY_WINDOWS) {
-            int remaining = limit - fallbacks.size();
-            if (remaining <= 0) {
-                break;
-            }
-
-            var topViews = userInteractionRepository.findTopViewedTitlesSince(
-                    now.minus(window.duration()),
-                    remaining * 3
-            );
-
-            for (var topView : topViews) {
-                UUID titleId = topView.getTitleId();
-                // Мутировать excludedTitleIds напрямую, чтобы избежать дублей между окнами
-                if (excludedTitleIds.add(titleId)) {
-                    fallbacks.add(new ScoredRecommendation(titleId, topView.getWeeklyViews().doubleValue(), window.reason()));
-                    if (fallbacks.size() >= limit) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        return fallbacks;
-    }
-
-    private List<PersonalRecommendationResponse> enrichWithTitleInfo(List<ScoredRecommendation> recommendations) {
-        if (recommendations.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        Set<UUID> titleIdsToEnrich = recommendations.stream()
-                .map(ScoredRecommendation::titleId)
-                .collect(Collectors.toSet());
-
-        Map<UUID, TitleShortInfo> titleInfoById = titlePublicQueryApi.getTitleShortInfoByIds(titleIdsToEnrich).stream()
+    private List<PersonalRecommendationResponse> enrich(List<ScoredCandidate> candidates, int limit) {
+        var ids = candidates.stream().map(ScoredCandidate::titleId).collect(Collectors.toSet());
+        var infoById = titleApi.getTitleShortInfoByIds(ids).stream()
                 .collect(Collectors.toMap(TitleShortInfo::id, Function.identity()));
 
-        return recommendations.stream()
-                .map(scored -> {
-                    var info = titleInfoById.get(scored.titleId());
-                    return info != null ? new PersonalRecommendationResponse(
-                            info.id(), info.name(), info.mainCoverMediaId(), info.slug(), scored.score(), scored.reason()
-                    ) : null;
+        return candidates.stream()
+                .limit(limit)
+                .map(c -> {
+                    var info = infoById.get(c.titleId());
+                    return info == null ? null : new PersonalRecommendationResponse(
+                            info.id(), info.name(), info.mainCoverMediaId(),
+                            info.slug(), c.finalScore(), c.reason()
+                    );
                 })
                 .filter(Objects::nonNull)
                 .toList();
     }
 
-    private List<UUID> getRecentViewedTitleIds(UUID userId) {
-        return userInteractionRepository.findRecentTargetIds(
-                        userId,
-                        InteractionType.TITLE_VIEWED,
-                        PageRequest.of(0, RECENT_HISTORY_LIMIT * 3)
+    private record ScoredCandidate(UUID titleId, double contentScore, double collabScore,
+                                   String reason, double finalScore) {
+        ScoredCandidate(UUID titleId, double contentScore, double collabScore, String reason) {
+            this(titleId, contentScore, collabScore, reason, 0.0);
+        }
+
+        ScoredCandidate withFinalScore(double score) {
+            return new ScoredCandidate(titleId, contentScore, collabScore, reason, score);
+        }
+    }
+
+    public List<PersonalRecommendationResponse> getSimilarTitles(UUID titleId, int limit) {
+        var candidates = similarTitlesRepository.findSimilarTitles(titleId, List.of(titleId), limit * CANDIDATE_MULTIPLIER);
+
+        if (candidates.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        var infoById = titleApi.getTitleShortInfoByIds(
+                        candidates.stream()
+                                .map(RecommendationsApi.ScoredTitleProjection::getTitleId)
+                                .collect(Collectors.toSet()
+                                )
                 ).stream()
-                .distinct()
-                .limit(RECENT_HISTORY_LIMIT)
+                .collect(Collectors.toMap(TitleShortInfo::id, Function.identity()));
+
+        return candidates.stream()
+                .limit(limit)
+                .map(c -> {
+                    var info = infoById.get(c.getTitleId());
+                    return (info == null) ? null : new PersonalRecommendationResponse(
+                            info.id(), info.name(), info.mainCoverMediaId(),
+                            info.slug(), c.getScore(), c.getReason()
+                    );
+                })
+                .filter(Objects::nonNull)
                 .toList();
-    }
-
-    private record ScoredRecommendation(UUID titleId, double score, String reason) {
-    }
-
-    private record FallbackWindow(Duration duration, String reason) {
     }
 
 }
