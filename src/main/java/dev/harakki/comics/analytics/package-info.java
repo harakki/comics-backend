@@ -4,7 +4,8 @@
                 "catalog :: api",
                 "collections :: api",
                 "content :: api",
-                "library :: api"
+                "library :: api",
+                "recommendations :: api"
         }
 )
 package dev.harakki.comics.analytics;
