@@ -2,14 +2,11 @@ package dev.harakki.comics.recommendations.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -18,9 +15,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "user_tag_profiles",
-    indexes = {
-        @Index(name = "idx_user_tag_profiles_user_id", columnList = "user_id")
-    }
+        indexes = {
+                @Index(name = "idx_user_tag_profiles_user_id", columnList = "user_id")
+        }
 )
 @EntityListeners(AuditingEntityListener.class)
 public class UserTagProfile {

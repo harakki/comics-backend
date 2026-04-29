@@ -210,14 +210,6 @@ public class RecommendationsService {
             this(titleId, contentScore, collabScore, reason, 0.0);
         }
 
-        ScoredCandidate(UUID titleId, double contentScore, double collabScore, String reason, double finalScore) {
-            this.titleId = titleId;
-            this.contentScore = contentScore;
-            this.collabScore = collabScore;
-            this.reason = reason;
-            this.finalScore = finalScore;
-        }
-
         ScoredCandidate withFinalScore(double finalScore) {
             return new ScoredCandidate(titleId, contentScore, collabScore, reason, finalScore);
         }
