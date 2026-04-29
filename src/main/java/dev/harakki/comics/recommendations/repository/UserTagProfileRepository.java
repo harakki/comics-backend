@@ -1,6 +1,6 @@
 package dev.harakki.comics.recommendations.repository;
 
-import dev.harakki.comics.recommendations.api.RecommendationsApi;
+import dev.harakki.comics.analytics.api.UserInteractionApi;
 import dev.harakki.comics.recommendations.domain.UserTagProfile;
 import dev.harakki.comics.recommendations.domain.UserTagProfileId;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,6 +40,6 @@ public interface UserTagProfileRepository extends JpaRepository<UserTagProfile, 
             ORDER BY score DESC
             LIMIT :limit
             """)
-    List<RecommendationsApi.ScoredTitleProjection> findContentCandidates(UUID userId, List<UUID> excludedIds, int limit);
+    List<UserInteractionApi.ScoredTitleProjection> findContentCandidates(UUID userId, List<UUID> excludedIds, int limit);
 
 }

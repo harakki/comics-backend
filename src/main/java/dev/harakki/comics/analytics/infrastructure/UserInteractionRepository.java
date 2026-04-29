@@ -3,7 +3,6 @@ package dev.harakki.comics.analytics.infrastructure;
 import dev.harakki.comics.analytics.api.InteractionType;
 import dev.harakki.comics.analytics.api.UserInteractionApi;
 import dev.harakki.comics.analytics.domain.UserInteraction;
-import dev.harakki.comics.recommendations.api.RecommendationsApi;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -135,7 +134,7 @@ public interface UserInteractionRepository extends UserInteractionApi, JpaReposi
             ORDER BY score DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<RecommendationsApi.ScoredTitleProjection> findCollabCandidates(UUID userId,
+    List<UserInteractionApi.ScoredTitleProjection> findCollabCandidates(UUID userId,
                                                                         List<UUID> likedTitleIds,
                                                                         List<UUID> excludedIds,
                                                                         int limit);
@@ -152,6 +151,6 @@ public interface UserInteractionRepository extends UserInteractionApi, JpaReposi
             ORDER BY score DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<RecommendationsApi.ScoredTitleProjection> findPopularSince(Instant since, List<UUID> excludedIds, int limit);
+    List<UserInteractionApi.ScoredTitleProjection> findPopularSince(Instant since, List<UUID> excludedIds, int limit);
 
 }

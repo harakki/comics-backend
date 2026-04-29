@@ -4,7 +4,6 @@ import dev.harakki.comics.analytics.api.InteractionType;
 import dev.harakki.comics.analytics.api.UserInteractionApi;
 import dev.harakki.comics.catalog.api.TitlePublicQueryApi;
 import dev.harakki.comics.catalog.api.TitleShortInfo;
-import dev.harakki.comics.recommendations.api.RecommendationsApi;
 import dev.harakki.comics.recommendations.dto.PersonalRecommendationResponse;
 import dev.harakki.comics.recommendations.repository.SimilarTitlesRepository;
 import dev.harakki.comics.recommendations.repository.UserTagProfileRepository;
@@ -112,7 +111,7 @@ public class RecommendationsService {
 
         var raw = userInteractionApi.findCollabCandidates(
                 userId, likedTitleIds, new ArrayList<>(excluded), limit * CANDIDATE_MULTIPLIER);
-        double max = raw.stream().mapToDouble(RecommendationsApi.ScoredTitleProjection::getScore).max().orElse(1.0);
+        double max = raw.stream().mapToDouble(UserInteractionApi.ScoredTitleProjection::getScore).max().orElse(1.0);
 
         return raw.stream()
                 .map(p -> new ScoredCandidate(p.getTitleId(), 0.0, p.getScore() / max, p.getReason()))
@@ -182,7 +181,11 @@ public class RecommendationsService {
     }
 
     public List<PersonalRecommendationResponse> getSimilarTitles(UUID titleId, int limit) {
-        var candidates = similarTitlesRepository.findSimilarTitles(titleId, List.of(titleId), limit * CANDIDATE_MULTIPLIER);
+        List<UserInteractionApi.ScoredTitleProjection> candidates = similarTitlesRepository.findSimilarTitles(
+                titleId,
+                List.of(titleId),
+                limit * CANDIDATE_MULTIPLIER
+        );
 
         if (candidates.isEmpty()) {
             return Collections.emptyList();
@@ -190,9 +193,8 @@ public class RecommendationsService {
 
         var infoById = titleApi.getTitleShortInfoByIds(
                         candidates.stream()
-                                .map(RecommendationsApi.ScoredTitleProjection::getTitleId)
-                                .collect(Collectors.toSet()
-                                )
+                                .map(UserInteractionApi.ScoredTitleProjection::getTitleId)
+                                .collect(Collectors.toSet())
                 ).stream()
                 .collect(Collectors.toMap(TitleShortInfo::id, Function.identity()));
 

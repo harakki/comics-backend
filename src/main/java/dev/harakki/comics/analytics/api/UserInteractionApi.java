@@ -1,6 +1,5 @@
 package dev.harakki.comics.analytics.api;
 
-import dev.harakki.comics.recommendations.api.RecommendationsApi;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
@@ -8,6 +7,16 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserInteractionApi {
+
+    interface ScoredTitleProjection {
+
+        UUID getTitleId();
+
+        double getScore();
+
+        String getReason();
+
+    }
 
     interface TopViewedTitleProjection {
 
@@ -92,10 +101,10 @@ public interface UserInteractionApi {
      * @param limit         Maximum number of candidate titles to return
      * @return List of candidate titles with their associated scores for collaborative filtering recommendations
      */
-    List<RecommendationsApi.ScoredTitleProjection> findCollabCandidates(UUID userId,
-                                                                        List<UUID> likedTitleIds,
-                                                                        List<UUID> excludedIds,
-                                                                        int limit);
+    List<ScoredTitleProjection> findCollabCandidates(UUID userId,
+                                                     List<UUID> likedTitleIds,
+                                                     List<UUID> excludedIds,
+                                                     int limit);
 
     /**
      * Finds popular titles since a given timestamp, excluding specified title IDs and limited by the given number.
@@ -105,6 +114,6 @@ public interface UserInteractionApi {
      * @param limit       Maximum number of candidate titles to return
      * @return List of popular titles with their associated scores for collaborative filtering recommendations
      */
-    List<RecommendationsApi.ScoredTitleProjection> findPopularSince(Instant since, List<UUID> excludedIds, int limit);
+    List<ScoredTitleProjection> findPopularSince(Instant since, List<UUID> excludedIds, int limit);
 
 }

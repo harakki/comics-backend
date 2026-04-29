@@ -1,6 +1,6 @@
 package dev.harakki.comics.recommendations.repository;
 
-import dev.harakki.comics.recommendations.api.RecommendationsApi;
+import dev.harakki.comics.analytics.api.UserInteractionApi;
 import dev.harakki.comics.recommendations.domain.UserTagProfile;
 import dev.harakki.comics.recommendations.domain.UserTagProfileId;
 import org.springframework.data.jpa.repository.Query;
@@ -25,6 +25,6 @@ public interface SimilarTitlesRepository extends Repository<UserTagProfile, User
             ORDER BY score DESC
             LIMIT    :limit
             """, nativeQuery = true)
-    List<RecommendationsApi.ScoredTitleProjection> findSimilarTitles(UUID titleId, List<UUID> excludedIds, int limit);
+    List<UserInteractionApi.ScoredTitleProjection> findSimilarTitles(UUID titleId, List<UUID> excludedIds, int limit);
 
 }
