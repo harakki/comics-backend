@@ -3,6 +3,7 @@ package dev.harakki.comics.analytics.application;
 import dev.harakki.comics.analytics.api.InteractionType;
 import dev.harakki.comics.analytics.api.UserInteractionApi;
 import dev.harakki.comics.analytics.domain.UserInteraction;
+import dev.harakki.comics.analytics.dto.AllTimePopularTitleResponse;
 import dev.harakki.comics.analytics.dto.TitleAnalyticsResponse;
 import dev.harakki.comics.analytics.dto.WeeklyPopularTitleResponse;
 import dev.harakki.comics.analytics.infrastructure.UserInteractionRepository;
@@ -36,8 +37,11 @@ import java.util.stream.Collectors;
 public class AnalyticsService {
 
     static final UUID ANONYMOUS_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-    private static final int WEEKLY_TOP_LIMIT = 10;
+
     private static final Duration WEEKLY_TOP_WINDOW = Duration.ofDays(7);
+
+    private static final int WEEKLY_TOP_LIMIT = 10;
+    private static final int ALL_TIME_TOP_LIMIT = 10;
 
     private final UserInteractionRepository userInteractionRepository;
     private final TitlePublicQueryApi titlePublicQueryApi;
@@ -91,7 +95,40 @@ public class AnalyticsService {
                     title.mainCoverMediaId(),
                     title.name(),
                     title.slug(),
-                    view.getWeeklyViews(),
+                    view.getViews(),
+                    rank++
+            ));
+        }
+
+        return result;
+    }
+
+    public List<AllTimePopularTitleResponse> getTopAllTimePopularTitles() {
+        var topViews = userInteractionRepository.findTopViewedTitles(ALL_TIME_TOP_LIMIT);
+        if (topViews.isEmpty()) {
+            return List.of();
+        }
+
+        var titleIds = topViews.stream()
+                .map(UserInteractionApi.TopViewedTitleProjection::getTitleId)
+                .toList();
+        var titleInfoById = titlePublicQueryApi.getTitleShortInfoByIds(titleIds).stream()
+                .collect(Collectors.toMap(TitleShortInfo::id, titleInfo -> titleInfo));
+
+        var result = new ArrayList<AllTimePopularTitleResponse>(ALL_TIME_TOP_LIMIT);
+        var rank = 1;
+
+        for (var view : topViews) {
+            var title = titleInfoById.get(view.getTitleId());
+            if (title == null) {
+                continue;
+            }
+            result.add(new AllTimePopularTitleResponse(
+                    view.getTitleId(),
+                    title.mainCoverMediaId(),
+                    title.name(),
+                    title.slug(),
+                    view.getViews(),
                     rank++
             ));
         }

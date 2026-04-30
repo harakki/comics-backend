@@ -206,7 +206,7 @@ class AnalyticsServiceTest {
             }
 
             @Override
-            public Long getWeeklyViews() {
+            public Long getViews() {
                 return views;
             }
         };

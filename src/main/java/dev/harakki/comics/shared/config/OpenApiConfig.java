@@ -40,7 +40,7 @@ public class OpenApiConfig {
     private Info apiInfo() {
         return new Info()
                 .title("Comics API")
-                .version("2.0.0")
+                .version("2.2.0")
                 .description("RESTful API for managing comics service.")
                 .contact(new Contact()
                         .name("harakki")

@@ -1,6 +1,7 @@
 package dev.harakki.comics.analytics.web;
 
 import dev.harakki.comics.analytics.application.AnalyticsService;
+import dev.harakki.comics.analytics.dto.AllTimePopularTitleResponse;
 import dev.harakki.comics.analytics.dto.TitleAnalyticsResponse;
 import dev.harakki.comics.analytics.dto.WeeklyPopularTitleResponse;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,11 @@ public class AnalyticsController implements AnalyticsApi {
     @GetMapping("/analytics/titles/top-weekly")
     public List<WeeklyPopularTitleResponse> getTopWeeklyPopularTitles() {
         return analyticsService.getTopWeeklyPopularTitles();
+    }
+
+    @GetMapping("/analytics/titles/top-all-time")
+    public List<AllTimePopularTitleResponse> getAllTimePopularTitles() {
+        return analyticsService.getTopAllTimePopularTitles();
     }
 
 }

@@ -56,6 +56,18 @@ public interface UserInteractionRepository extends UserInteractionApi, JpaReposi
     List<UserInteractionApi.TopViewedTitleProjection> findTopViewedTitlesSince(Instant since, int limit);
 
     @Query(value = """
+            SELECT
+                target_id AS titleId,
+                COUNT(*) AS totalViews
+            FROM user_interactions
+            WHERE type = 'TITLE_VIEWED'
+            GROUP BY target_id
+            ORDER BY totalViews DESC, titleId ASC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<UserInteractionApi.TopViewedTitleProjection> findTopViewedTitles(int limit);
+
+    @Query(value = """
             SELECT ui.target_id AS targetId,
                    ui.metadata ->> 'voteType' AS voteType,
                    ui.occurred_at AS occurredAt

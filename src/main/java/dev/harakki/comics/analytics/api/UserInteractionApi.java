@@ -22,7 +22,7 @@ public interface UserInteractionApi {
 
         UUID getTitleId();
 
-        Long getWeeklyViews();
+        Long getViews();
 
     }
 

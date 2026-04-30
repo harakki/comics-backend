@@ -1,5 +1,6 @@
 package dev.harakki.comics.analytics.web;
 
+import dev.harakki.comics.analytics.dto.AllTimePopularTitleResponse;
 import dev.harakki.comics.analytics.dto.TitleAnalyticsResponse;
 import dev.harakki.comics.analytics.dto.WeeklyPopularTitleResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,5 +32,12 @@ public interface AnalyticsApi {
     )
     @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(schema = @Schema(implementation = WeeklyPopularTitleResponse.class))))
     List<WeeklyPopularTitleResponse> getTopWeeklyPopularTitles();
+
+    @Operation(
+            operationId = "getAllTimePopularTitles",
+            summary = "Get top 10 popular titles of all time"
+    )
+    @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AllTimePopularTitleResponse.class))))
+    List<AllTimePopularTitleResponse> getAllTimePopularTitles();
 
 }
