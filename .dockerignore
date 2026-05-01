@@ -1,0 +1,27 @@
+# macOS files
+.DS_Store
+
+# Project files
+.git
+.github
+.gradle
+.idea
+.vscode
+build
+out
+*.iml
+.gitattributes
+.gitignore
+LICENSE
+NOTICE
+README.md
+README_RUS.md
+task.md
+
+# Local environment
+.env
+*.env
+
+# Files not needed for image build
+misc
+seed
