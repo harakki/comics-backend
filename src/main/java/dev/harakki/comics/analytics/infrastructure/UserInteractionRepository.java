@@ -45,12 +45,12 @@ public interface UserInteractionRepository extends UserInteractionApi, JpaReposi
     @Query(value = """
             SELECT
                 target_id AS titleId,
-                COUNT(*) AS weeklyViews
+                COUNT(*) AS views
             FROM user_interactions
             WHERE type = 'TITLE_VIEWED'
               AND occurred_at >= :since
             GROUP BY target_id
-            ORDER BY weeklyViews DESC, titleId ASC
+            ORDER BY views DESC, titleId ASC
             LIMIT :limit
             """, nativeQuery = true)
     List<UserInteractionApi.TopViewedTitleProjection> findTopViewedTitlesSince(Instant since, int limit);
@@ -58,11 +58,11 @@ public interface UserInteractionRepository extends UserInteractionApi, JpaReposi
     @Query(value = """
             SELECT
                 target_id AS titleId,
-                COUNT(*) AS totalViews
+                COUNT(*) AS views
             FROM user_interactions
             WHERE type = 'TITLE_VIEWED'
             GROUP BY target_id
-            ORDER BY totalViews DESC, titleId ASC
+            ORDER BY views DESC, titleId ASC
             LIMIT :limit
             """, nativeQuery = true)
     List<UserInteractionApi.TopViewedTitleProjection> findTopViewedTitles(int limit);
