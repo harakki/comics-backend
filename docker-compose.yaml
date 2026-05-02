@@ -1,6 +1,8 @@
 services:
   backend:
     build: .
+    profiles:
+      - with-backend
     environment:
       DATABASE_URL: ${BACKEND_DB_URL}
       DATABASE_USERNAME: ${POSTGRES_USERNAME}
@@ -93,6 +95,8 @@ services:
 
   seed:
     build: ./seed
+    profiles:
+      - with-backend
     depends_on:
       backend:
         condition: service_healthy
