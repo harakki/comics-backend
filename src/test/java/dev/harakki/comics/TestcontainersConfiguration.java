@@ -22,7 +22,8 @@ public class TestcontainersConfiguration {
                 .withEnv("MINIO_ROOT_PASSWORD", "minioadmin");
         container.start();
 
-        System.setProperty("s3.endpoint", container.getS3URL());
+        System.setProperty("s3.internal-endpoint", container.getS3URL());
+        System.setProperty("s3.external-endpoint", container.getS3URL());
         System.setProperty("s3.access-key", container.getUserName());
         System.setProperty("s3.secret-key", container.getPassword());
         System.setProperty("s3.region", "us-east-1");
