@@ -30,7 +30,7 @@ class S3Config {
 
         return S3Client.builder()
                 .region(Region.of(s3Properties.getRegion()))
-                .endpointOverride(URI.create(s3Properties.getEndpoint()))
+                .endpointOverride(URI.create(s3Properties.getInternalEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .forcePathStyle(true)
                 .build();
@@ -42,7 +42,7 @@ class S3Config {
 
         return S3Presigner.builder()
                 .region(Region.of(s3Properties.getRegion()))
-                .endpointOverride(URI.create(s3Properties.getEndpoint()))
+                .endpointOverride(URI.create(s3Properties.getExternalEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)

@@ -8,7 +8,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class S3Properties {
 
     private String region;
-    private String endpoint;
+    private String internalEndpoint;
+    private String externalEndpoint;
     private String accessKey;
     private String secretKey;
     private String bucket;
