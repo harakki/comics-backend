@@ -12,22 +12,6 @@ echo "Backend is fully ready!"
 echo "Running seed scripts..."
 
 # ======================
-# MinIO
-# ======================
-if [ -f /minio/.initialized ]; then
-  echo "MinIO already initialized, skipping..."
-else
-  echo "Restoring MinIO..."
-  if [ -f /seed/minio/minio_dump.tar ]; then
-    tar xvf /seed/minio/minio_dump.tar -C /minio
-    touch /minio/.initialized
-    echo "MinIO restore completed"
-  else
-    echo "[!] No MinIO dump found, skipping..."
-  fi
-fi
-
-# ======================
 # PostgreSQL
 # ======================
 if [ -f /postgres/.initialized ]; then
@@ -36,7 +20,6 @@ else
   echo "Restoring Postgres..."
 
   if ls /seed/postgres/*.sql >/dev/null 2>&1; then
-    apk add --no-cache postgresql-client
     for file in /seed/postgres/*.sql; do
       [ -e "$file" ] || continue
       echo "Applying $file..."
@@ -47,6 +30,15 @@ else
   else
     echo "[!] No PostgreSQL dumps found, skipping..."
   fi
+fi
+
+# ======================
+# MinIO
+# ======================
+if [ -f /minio/.initialized ]; then
+  echo "MinIO already initialized, skipping..."
+else
+  echo "Restoring MinIO..."
 fi
 
 echo "Seeding completed"

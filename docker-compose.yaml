@@ -85,7 +85,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./init/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+      - ./init/keycloak:/opt/keycloak/data/import:ro
       - keycloak_data:/opt/keycloak/data
     healthcheck:
       test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000;echo -e 'GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n' >&3;if [ $? -eq 0 ]; then echo 'Healthcheck Successful';exit 0;else echo 'Healthcheck Failed';exit 1;fi;" ]
