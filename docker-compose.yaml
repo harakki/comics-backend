@@ -105,6 +105,13 @@ services:
       - postgres_data:/postgres
       - minio_data:/minio
     environment:
+      # MinIO
+      MINIO_HOST: minio:${MINIO_PORT}
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USERNAME}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${BACKEND_S3_BUCKET_NAME}
+      # PostgreSQL
+      POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USERNAME: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

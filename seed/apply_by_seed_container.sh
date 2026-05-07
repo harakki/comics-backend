@@ -39,6 +39,7 @@ if [ -f /minio/.initialized ]; then
   echo "MinIO already initialized, skipping..."
 else
   echo "Restoring MinIO..."
+  python3 /seed/minio/main.py
 fi
 
 echo "Seeding completed"
