@@ -1,9 +1,30 @@
 services:
+  traefik:
+    image: traefik:v3.7
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+    labels:
+      - traefik.enable=true
+      # Traefik Dashboard
+      - traefik.http.routers.dashboard.rule=Host(`traefik-console.localhost`)
+      - traefik.http.routers.dashboard.entrypoints=web
+      - traefik.http.routers.dashboard.service=api@internal
+    ports:
+      - "80:80"
+    networks:
+      - app
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+
   backend:
     build: .
-    profiles:
-      - with-backend
     environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:-}
       DATABASE_URL: ${BACKEND_DB_URL}
       DATABASE_USERNAME: ${POSTGRES_USERNAME}
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
@@ -14,8 +35,16 @@ services:
       S3_BUCKET: ${BACKEND_S3_BUCKET_NAME}
       JWT_ISSUER_URI: ${BACKEND_JWT_ISSUER_URI}
       JWT_JWK_SET_URI: ${BACKEND_JWT_JWK_SET_URI}
+    labels:
+      - traefik.enable=true
+      # Backend API
+      - traefik.http.routers.backend.rule=Host(`api.localhost`)
+      - traefik.http.routers.backend.entrypoints=web
+      - traefik.http.services.backend.loadbalancer.server.port=8080
     ports:
-      - '${BACKEND_PORT}:8080'
+      - "5005:5005" # IntelliJ IDEA debug port (TCP)
+    networks:
+      - app
     depends_on:
       postgres:
         condition: service_healthy
@@ -36,11 +65,13 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - '${POSTGRES_PORT}:5432'
     volumes:
       - ./init/postgres/:/docker-entrypoint-initdb.d/:ro
       - postgres_data:/var/lib/postgresql
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432" # Port for database client (TCP)
+    networks:
+      - app
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_DB}" ]
       interval: 5s
@@ -54,11 +85,22 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USERNAME}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     command: server /data --console-address ":9001"
-    ports:
-      - '${MINIO_PORT}:9000'
-      - '${MINIO_CONSOLE_PORT}:9001'
+    labels:
+      - traefik.enable=true
+      # MinIO API (S3)
+      - traefik.http.routers.minio.rule=Host(`s3.localhost`)
+      - traefik.http.routers.minio.entrypoints=web
+      - traefik.http.routers.minio.service=minio
+      - traefik.http.services.minio.loadbalancer.server.port=9000
+      # MinIO Console
+      - traefik.http.routers.minio-console.rule=Host(`minio-console.localhost`)
+      - traefik.http.routers.minio-console.entrypoints=web
+      - traefik.http.routers.minio-console.service=minio-console
+      - traefik.http.services.minio-console.loadbalancer.server.port=9001
     volumes:
       - minio_data:/data
+    networks:
+      - app
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       interval: 5s
@@ -72,15 +114,22 @@ services:
       # Base configuration
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_BOOTSTRAP_ADMIN_USERNAME}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_BOOTSTRAP_ADMIN_PASSWORD}
-      KC_HEALTH_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: true
       # Database configuration
       KC_DB_URL: ${KEYCLOAK_DB_URL}
       KC_DB: ${KEYCLOAK_DB}
       KC_DB_USERNAME: ${KEYCLOAK_DB_USERNAME}
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
     command: start-dev --import-realm
-    ports:
-      - '${KEYCLOAK_PORT}:8080'
+    labels:
+      - traefik.enable=true
+      # Keycloak Auth & Admin
+      - traefik.http.routers.keycloak.rule=Host(`auth.localhost`)
+      - traefik.http.routers.keycloak.entrypoints=web
+      - traefik.http.services.keycloak.loadbalancer.server.port=8080
+    networks:
+      - app
     depends_on:
       postgres:
         condition: service_healthy
@@ -96,8 +145,6 @@ services:
 
   seed:
     build: ./seed
-    profiles:
-      - with-backend
     depends_on:
       backend:
         condition: service_healthy
@@ -106,18 +153,23 @@ services:
       - minio_data:/minio
     environment:
       # MinIO
-      MINIO_HOST: minio:${MINIO_PORT}
+      MINIO_HOST: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USERNAME}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET: ${BACKEND_S3_BUCKET_NAME}
       # PostgreSQL
-      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_PORT: 5432
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USERNAME: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - app
     restart: "no"
 
 volumes:
   postgres_data:
   minio_data:
   keycloak_data:
+
+networks:
+  app:
