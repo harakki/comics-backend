@@ -66,6 +66,9 @@ dependencies {
     // Database
     runtimeOnly("org.postgresql:postgresql")
 
+    // Prometheus
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+
     // Dev
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
